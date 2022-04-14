@@ -1,25 +1,31 @@
 # Declare the local Bazel workspace.
 workspace(
-    # If your ruleset is "official"
-    # (i.e. is in the bazelbuild GitHub org)
-    # then this should just be named "rules_mylang"
     # see https://docs.bazel.build/versions/main/skylark/deploying.html#workspace
-    name = "com_myorg_rules_mylang",
+    name = "aspect_rules_esbuild",
 )
 
-load(":internal_deps.bzl", "rules_mylang_internal_deps")
+load(":internal_deps.bzl", "rules_esbuild_internal_deps")
 
 # Fetch deps needed only locally for development
-rules_mylang_internal_deps()
+rules_esbuild_internal_deps()
 
-load("//mylang:repositories.bzl", "mylang_register_toolchains", "rules_mylang_dependencies")
+load("//esbuild:dependencies.bzl", "rules_esbuild_dependencies")
 
 # Fetch dependencies which users need as well
-rules_mylang_dependencies()
+rules_esbuild_dependencies()
 
-mylang_register_toolchains(
-    name = "mylang1_14",
-    mylang_version = "1.14.2",
+load("@rules_nodejs//nodejs:repositories.bzl", "nodejs_register_toolchains")
+
+nodejs_register_toolchains(
+    name = "node16",
+    node_version = "16.9.0",
+)
+
+load("//esbuild:repositories.bzl", "esbuild_register_toolchains")
+
+esbuild_register_toolchains(
+    name = "esbuild0_13",
+    esbuild_version = "0.13.12",
 )
 
 # For running our own unit tests
