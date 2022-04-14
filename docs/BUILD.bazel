@@ -3,8 +3,13 @@
 load("@aspect_bazel_lib//lib:docs.bzl", "stardoc_with_diff_test", "update_docs")
 
 stardoc_with_diff_test(
-    bzl_library_target = "//mylang:defs",
+    bzl_library_target = "//esbuild:defs",
     out_label = "//docs:rules.md",
+)
+
+stardoc_with_diff_test(
+    bzl_library_target = "//esbuild/private:esbuild",
+    out_label = "//docs:esbuild.md",
 )
 
 update_docs(

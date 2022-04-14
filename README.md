@@ -1,37 +1,22 @@
-# Template for Bazel rules
+# Bazel rules for esbuild
 
-Copy this template to create a Bazel ruleset.
+This is a Bazel rule which wraps the esbuild CLI.
 
 Features:
 
-- follows the official style guide at https://docs.bazel.build/versions/main/skylark/deploying.html
-- includes Bazel formatting as a pre-commit hook (using [buildifier])
-- includes stardoc API documentation generator
-- includes typical toolchain setup
-- CI configured with GitHub Actions
-- Release on GitHub Actions when pushing a tag
+- Same API as the `@bazel/esbuild` package, so it's easy to migrate.
+- Use the Bazel downloader to fetch the npm package and the native binaries as described here:
+  <https://esbuild.github.io/getting-started/#download-a-build>.
+  This means that the toolchain is fully self-contained and hermetic, and doesn't require you to
+  put esbuild in your package.json. These rules never run `npm install`.
 
-See https://docs.bazel.build/versions/main/skylark/deploying.html#readme
+## Usage
 
-[buildifier]: https://github.com/bazelbuild/buildtools/tree/master/buildifier#readme
-
-Ready to get started? Copy this repo, then
-
-1. search for "com_myorg_rules_mylang" and replace with the name you'll use for your workspace
-1. search for "myorg" and replace with GitHub org
-1. search for "mylang" and replace with the language/tool your rules are for
-1. rename directory "mylang" similarly
-1. run `pre-commit install` to get lints (see CONTRIBUTING.md)
-1. if you don't need to fetch platform-dependent tools, then remove anything toolchain-related.
-1. update the `actions/cache@v2` bazel cache key in [.github/workflows/ci.yaml](.github/workflows/ci.yaml) and [.github/workflows/release.yml](.github/workflows/release.yml) to be a hash of your source files.
-1. delete this section of the README (everything up to the SNIP).
-
----- SNIP ----
-
-# Bazel rules for mylang
+See the API documentation in the `docs/` directory,
+and the example usage in the `example/` directory.
 
 ## Installation
 
 From the release you wish to use:
-<https://github.com/myorg/rules_mylang/releases>
+<https://github.com/aspect-build/rules_esbuild/releases>
 copy the WORKSPACE snippet into your `WORKSPACE` file.
