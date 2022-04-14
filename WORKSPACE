@@ -24,8 +24,8 @@ nodejs_register_toolchains(
 load("//esbuild:repositories.bzl", "esbuild_register_toolchains")
 
 esbuild_register_toolchains(
-    name = "esbuild0_13",
-    esbuild_version = "0.13.12",
+    name = "esbuild14",
+    esbuild_version = "0.14.36",
 )
 
 # For running our own unit tests

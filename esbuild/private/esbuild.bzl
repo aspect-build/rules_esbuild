@@ -68,9 +68,8 @@ See https://esbuild.github.io/api/#format for more details
 """,
     ),
     "launcher": attr.label(
-        mandatory = True,
         executable = True,
-        doc = "Internal use only",
+        doc = "Override the default esbuild wrapper, which is supplied by the esbuild toolchain",
         cfg = "exec",
     ),
     "link_workspace_root": attr.bool(
@@ -332,6 +331,7 @@ def _esbuild_impl(ctx):
     #     inputs.append(ctx.version_file)
     #     env["BAZEL_VERSION_FILE"] = ctx.version_file.path
 
+    launcher = ctx.executable.launcher or esbuild_toolinfo.launcher.files_to_run
     ctx.actions.run(
         inputs = inputs + node_toolinfo.tool_files + esbuild_toolinfo.tool_files,
         outputs = outputs,
@@ -340,7 +340,7 @@ def _esbuild_impl(ctx):
         execution_requirements = execution_requirements,
         mnemonic = "esbuild",
         env = env,
-        executable = ctx.executable.launcher,
+        executable = launcher,
         # link_workspace_root = ctx.attr.link_workspace_root,
         # tools = esbuild_toolinfo.tool_files,
     )
