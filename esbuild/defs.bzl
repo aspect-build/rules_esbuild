@@ -1,7 +1,6 @@
 "Public API re-exports"
 
 load("//esbuild/private:esbuild.bzl", _esbuild = "esbuild_bundle")
-load("@aspect_rules_js//js:nodejs_binary.bzl", "nodejs_binary")
 
 def esbuild(name, output_dir = False, splitting = False, **kwargs):
     """esbuild helper macro around the `esbuild_bundle` rule
@@ -14,16 +13,6 @@ def esbuild(name, output_dir = False, splitting = False, **kwargs):
         splitting: If `True`, produce a code split bundle in the output directory
         **kwargs: All other args from `esbuild_bundle`
     """
-
-    kwargs.pop("launcher", None)
-    _launcher = "_%s_esbuild_launcher" % name
-    nodejs_binary(
-        name = _launcher,
-        entry_point = Label("@aspect_rules_esbuild//esbuild/private:launcher.js"),
-        # FIXME: can't hard-code the version here
-        data = ["@npm_esbuild-0.13.12"],
-    )
-
     srcs = kwargs.pop("srcs", [])
     deps = kwargs.pop("deps", [])
     entry_points = kwargs.get("entry_points", None)
@@ -39,7 +28,6 @@ def esbuild(name, output_dir = False, splitting = False, **kwargs):
             srcs = srcs,
             splitting = splitting,
             output_dir = True,
-            launcher = _launcher,
             deps = deps,
             **kwargs
         )
@@ -58,7 +46,6 @@ def esbuild(name, output_dir = False, splitting = False, **kwargs):
             srcs = srcs,
             output = output,
             output_map = output_map,
-            launcher = _launcher,
             deps = deps,
             **kwargs
         )

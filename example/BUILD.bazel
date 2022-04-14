@@ -8,8 +8,8 @@ genrule(
     # The result will be in bazel-out/example/help
     outs = ["help"],
     cmd = "$(ESBUILD_BIN) --help > $@",
-    toolchains = ["@esbuild0_13_toolchains//:resolved_toolchain"],
-    tools = ["@esbuild0_13_toolchains//:resolved_toolchain"],
+    toolchains = ["@esbuild14_toolchains//:resolved_toolchain"],
+    tools = ["@esbuild14_toolchains//:resolved_toolchain"],
 )
 
 esbuild(
