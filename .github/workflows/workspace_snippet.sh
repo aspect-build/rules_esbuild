@@ -36,7 +36,7 @@ nodejs_register_toolchains(
 )
 
 # Register a toolchain containing esbuild npm package and native bindings
-load("//esbuild:repositories.bzl", "esbuild_register_toolchains")
+load("@aspect_rules_esbuild//esbuild:repositories.bzl", "esbuild_register_toolchains")
 
 esbuild_register_toolchains(
     name = "esbuild14",
