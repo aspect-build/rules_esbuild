@@ -1,0 +1,6 @@
+"use strict"
+(() => {
+  // examples/banner/main.js
+  console.log(1);
+})();
+//# sourceMappingURL=banner_quotes.js.map
