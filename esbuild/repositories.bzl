@@ -69,13 +69,12 @@ def esbuild_register_toolchains(name, esbuild_version, **kwargs):
         esbuild_version: a supported version like "0.14.36"
         **kwargs: passed to each node_repositories call
     """
-    hashes = TOOL_VERSIONS[esbuild_version]
-    npm_import(
-        integrity = hashes["npm"],
-        package = "esbuild",
-        version = esbuild_version,
-    )
-
+    if esbuild_version not in TOOL_VERSIONS.keys():
+        fail("""\
+esbuild version {} is not currently mirrored into rules_esbuild.
+Please instead choose one of these available versions: {}
+Or, make a PR to the repo running /scripts/mirror_release.sh to add the newest version.
+If you need custom versions, please file an issue.""".format(esbuild_version, TOOL_VERSIONS.keys()))
     for platform in PLATFORMS.keys():
         esbuild_repositories(
             name = name + "_" + platform,
@@ -88,4 +87,10 @@ def esbuild_register_toolchains(name, esbuild_version, **kwargs):
     toolchains_repo(
         name = name + "_toolchains",
         user_repository_name = name,
+    )
+
+    npm_import(
+        integrity = TOOL_VERSIONS[esbuild_version]["npm"],
+        package = "esbuild",
+        version = esbuild_version,
     )
