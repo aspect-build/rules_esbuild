@@ -13,7 +13,7 @@ Features:
 ## Usage
 
 See the API documentation in the `docs/` directory,
-and the example usage in the `example/` directory.
+and the examples of usage in the `examples/` directory.
 
 ## Installation
 
