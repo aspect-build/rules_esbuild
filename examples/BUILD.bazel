@@ -5,7 +5,7 @@ load("@bazel_skylib//rules:build_test.bzl", "build_test")
 genrule(
     name = "esbuild_help",
     srcs = [],
-    # The result will be in bazel-out/example/help
+    # The result will be in bazel-out/examples/help
     outs = ["help"],
     cmd = "$(ESBUILD_BIN) --help > $@",
     toolchains = ["@esbuild14_toolchains//:resolved_toolchain"],
