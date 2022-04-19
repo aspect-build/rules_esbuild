@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+(() => {
+  // examples/banner/main.js
+  console.log(1);
+})();
+//# sourceMappingURL=banner_spaces.js.map

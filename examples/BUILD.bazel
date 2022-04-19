@@ -1,17 +1,6 @@
 load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 
-# Show how to call esbuild directly using the toolchain
-genrule(
-    name = "esbuild_help",
-    srcs = [],
-    # The result will be in bazel-out/examples/help
-    outs = ["help"],
-    cmd = "$(ESBUILD_BIN) --help > $@",
-    toolchains = ["@esbuild14_toolchains//:resolved_toolchain"],
-    tools = ["@esbuild14_toolchains//:resolved_toolchain"],
-)
-
 esbuild(
     name = "lib",
     srcs = [
@@ -19,9 +8,6 @@ esbuild(
         "name.js",
     ],
     entry_point = "main.js",
-    deps = [
-        # "@npm//date-fns",
-    ],
 )
 
 build_test(

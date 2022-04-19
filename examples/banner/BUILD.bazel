@@ -1,0 +1,43 @@
+"Demonstrates how to put a banner on output files, see https://esbuild.github.io/api/#banner"
+
+load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
+
+esbuild(
+    name = "banner_newline",
+    config = {
+        "banner": {
+            "js": "//header\n//comments",
+        },
+    },
+    entry_point = "main.js",
+)
+
+esbuild(
+    name = "banner_quotes",
+    config = {
+        "banner": {
+            "js": "\"use strict\"",
+        },
+    },
+    entry_point = "main.js",
+)
+
+esbuild(
+    name = "banner_spaces",
+    config = {
+        "banner": {
+            "js": "#!/usr/bin/env node",
+        },
+    },
+    entry_point = "main.js",
+)
+
+write_source_files(
+    name = "assertions",
+    files = {
+        "newline.expected": "banner_newline.js",
+        "spaces.expected": "banner_spaces.js",
+        "quotes.expected": "banner_quotes.js",
+    },
+)

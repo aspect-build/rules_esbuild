@@ -5,11 +5,6 @@ load("@rules_nodejs//nodejs:providers.bzl", "JSModuleInfo")
 load(":helpers.bzl", "desugar_entry_point_names", "filter_files", "resolve_entry_point", "write_args_file", "write_jsconfig_file")
 
 _ATTRS = {
-    "args": attr.string_dict(
-        default = {},
-        doc = """A dict of extra arguments that are included in the call to esbuild, where the key is the argument name.
-Values are subject to $(location ...) expansion""",
-    ),
     "args_file": attr.label(
         allow_single_file = True,
         mandatory = False,
@@ -158,10 +153,10 @@ See https://esbuild.github.io/api/#target for more details
     """,
     ),
     "config": attr.label(
-        providers = [JSModuleInfo],
         mandatory = False,
-        doc = """Configuration file used for esbuild, from the esbuild_config macro. Note that options set in this file may get overwritten.
-See https://github.com/bazelbuild/rules_nodejs/tree/stable/packages/esbuild/test/plugins/BUILD.bazel for examples of using esbuild_config and plugins.
+        allow_single_file = True,
+        doc = """Configuration file used for esbuild. Note that options set in this file may get overwritten.
+        TODO: show how to write a config file that depends on plugins, similar to the esbuild_config macro in rules_nodejs.
     """,
     ),
 }
@@ -316,12 +311,16 @@ def _esbuild_impl(ctx):
         launcher_args.add("--user_args=%s" % ctx.file.args_file.path)
 
     if ctx.attr.config:
-        configs = ctx.attr.config[JSModuleInfo].sources.to_list()
-        if len(configs) != 1:
-            fail("Expected only one source file: the configuration entrypoint")
+        if JSModuleInfo in ctx.attr.config:
+            configs = ctx.attr.config[JSModuleInfo].sources.to_list()
+            if len(configs) != 1:
+                fail("Expected only one source file: the configuration entrypoint")
 
-        inputs.append(configs[0])
-        launcher_args.add("--config_file=%s" % configs[0].path)
+            inputs.append(configs[0])
+            launcher_args.add("--config_file=%s" % configs[0].path)
+        else:
+            inputs.append(ctx.file.config)
+            launcher_args.add("--config_file=%s" % ctx.file.config.path)
 
     # stamp = ctx.attr.node_context_data[NodeContextInfo].stamp
     # if stamp:

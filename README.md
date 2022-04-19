@@ -10,13 +10,53 @@ Features:
   This means that the toolchain is fully self-contained and hermetic, and doesn't require you to
   put esbuild in your package.json. These rules never run `npm install`.
 
-## Usage
-
-See the API documentation in the `docs/` directory,
-and the examples of usage in the `examples/` directory.
-
 ## Installation
 
 From the release you wish to use:
 <https://github.com/aspect-build/rules_esbuild/releases>
 copy the WORKSPACE snippet into your `WORKSPACE` file.
+
+## Usage
+
+See the API documentation in the [`docs/`](docs/) directory,
+and the example usage in the [`examples/`](examples/) directory.
+Note that the examples rely on code in the `/WORKSPACE` file in the root of this repo.
+
+## From a BUILD file
+
+The simplest usage is with the [`esbuild` macro](./docs/rules).
+
+If needed, instead of the macro you could call the underlying [`esbuild_bundle` rule](./docs/esbuild) directly.
+
+# In a macro
+
+You could write a Bazel macro which uses esbuild, by calling it from a `genrule` or
+[`run_binary`](https://docs.aspect.build/bazelbuild/bazel-skylib/1.2.1/docs/run_binary_doc_gen.html#run_binary).
+For this purpose, you can use the `ESBUILD_BIN` Make variable exposed by the
+`@[esbuild repo name]_toolchains//:resolved_toolchain`.
+This is illustrated in examples/macro.
+
+# In a custom rule
+
+The most advanced usage is to write your own custom rule.
+
+This is a good choice if you need to integrate with other Bazel rules via [Providers](https://docs.bazel.build/versions/main/skylark/rules.html#providers).
+
+You can follow the example of `/esbuild/defs.bzl` by re-using the `lib` starlark struct exposed by
+`/esbuild/private/esbuild.bzl`.
+Note that this is a private API which can change without notice.
+
+## Custom Toolchain
+
+You can register your own toolchain to provide an esbuild binary.
+For example, you could build esbuild from source within the Bazel build, so that you can freely
+edit or patch esbuild and have those changes immediately reflected.
+You'll need these things:
+
+1. A rule which builds or loads an esbuild binary, for example a `go_binary` rule.
+2. An `esbuild_toolchain` rule which depends on that binary from step 1 as the `target_tool`.
+3. A [`toolchain` rule](https://bazel.build/reference/be/platform#toolchain) which depends on
+   that target from step 2 as its `toolchain` and
+   `@aspect_rules_esbuild//esbuild:toolchain_type` as its `toolchain_type`.
+4. A call to [the `register_toolchains` function](https://bazel.build/rules/lib/globals#register_toolchains)
+   in your `WORKSPACE` that refers to the `toolchain` rule defined in step 3.

@@ -1,0 +1,7 @@
+//header
+//comments
+(() => {
+  // examples/banner/main.js
+  console.log(1);
+})();
+//# sourceMappingURL=banner_newline.js.map

@@ -11,6 +11,7 @@ toolchain_type(
     visibility = ["//visibility:public"],
 )
 
+# gazelle:exclude dependencies.bzl
 bzl_library(
     name = "repositories",
     srcs = ["repositories.bzl"],
@@ -30,6 +31,8 @@ bzl_library(
     deps = [
         "//esbuild/private:esbuild",
         "@aspect_rules_js//js:nodejs_binary",
+        "@bazel_skylib//lib:types",
+        "@bazel_skylib//rules:write_file",
     ],
 )
 

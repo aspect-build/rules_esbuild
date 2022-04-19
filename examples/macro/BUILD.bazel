@@ -1,0 +1,14 @@
+load("//examples:asserts.bzl", "assert_contains")
+load(":esbuild.bzl", "esbuild_help")
+
+esbuild_help(
+    name = "esbuild_help",
+    out = "help.txt",
+)
+
+# Asserting that the macro has the expected output.
+assert_contains(
+    name = "test",
+    actual = "help.txt",
+    expected = "esbuild [options] [entry points]",
+)
