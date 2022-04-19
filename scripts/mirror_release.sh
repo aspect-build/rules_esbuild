@@ -10,3 +10,5 @@ for pkg in darwin-{,arm}64 linux-{,arm}64 windows-64; do
     echo "        \"$pkg\": $(curl --silent "https://registry.npmjs.org/esbuild-${pkg}/latest" | jq ".dist.integrity"),"
 done
 echo "    },"
+echo
+echo "Now paste the code block above into /esbuild/private/versions.bzl"
