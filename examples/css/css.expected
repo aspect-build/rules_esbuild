@@ -1,0 +1,5 @@
+/* bazel-out/[platform]/bin/examples/css/button.css */
+.content {
+  font-size: xx-small;
+}
+/*# sourceMappingURL=with_css.css.map */
