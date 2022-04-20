@@ -1,0 +1,13 @@
+(() => {
+  var __defProp = Object.defineProperty;
+  var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+
+  // bazel-out/[platform]/bin/examples/css/app.jsx
+  var Button = /* @__PURE__ */ __name(function(_a) {
+    var text = _a.text;
+    return React.createElement("div", {
+      className: "button"
+    }, text);
+  }, "Button");
+})();
+//# sourceMappingURL=with_css.js.map
