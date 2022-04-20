@@ -1,4 +1,4 @@
-/* bazel-out/[platform]/bin/examples/css/button.css */
+/* examples/css/button.css */
 .content {
   font-size: xx-small;
 }

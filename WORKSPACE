@@ -32,6 +32,18 @@ esbuild_register_toolchains(
     esbuild_version = "0.14.36",
 )
 
+# Install additional packages to test esbuild plugins
+load("@aspect_rules_js//js:npm_import.bzl", "translate_pnpm_lock")
+
+translate_pnpm_lock(
+    name = "esbuild_plugins",
+    pnpm_lock = "//examples/plugins:pnpm-lock.json",
+)
+
+load("@esbuild_plugins//:repositories.bzl", _esbuild_plugin_repositories = "npm_repositories")
+
+_esbuild_plugin_repositories()
+
 # For running our own unit tests
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 

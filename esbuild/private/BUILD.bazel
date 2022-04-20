@@ -16,6 +16,7 @@ bzl_library(
     visibility = ["//:__subpackages__"],
     deps = [
         ":helpers",
+        "@aspect_bazel_lib//lib:copy_to_bin",
         "@aspect_bazel_lib//lib:expand_make_vars",
         "@rules_nodejs//nodejs:bzl",
     ],
