@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "dependencies": {
+    "esbuild-plugin-svg": "^0.1.0"
+  }
+}

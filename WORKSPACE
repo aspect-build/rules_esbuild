@@ -18,6 +18,16 @@ load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
 
 rules_js_dependencies()
 
+load("@aspect_rules_ts//ts:repositories.bzl", "rules_ts_dependencies")
+
+rules_ts_dependencies()
+
+load("@aspect_bazel_lib//lib:repositories.bzl", "DEFAULT_YQ_VERSION", "register_yq_toolchains")
+
+register_yq_toolchains(
+    version = DEFAULT_YQ_VERSION,
+)
+
 load("@rules_nodejs//nodejs:repositories.bzl", "nodejs_register_toolchains")
 
 nodejs_register_toolchains(
@@ -31,6 +41,19 @@ esbuild_register_toolchains(
     name = "esbuild14",
     esbuild_version = "0.14.36",
 )
+
+# Install additional packages to test esbuild plugins
+load("@aspect_rules_js//js:npm_import.bzl", "translate_pnpm_lock")
+
+translate_pnpm_lock(
+    name = "esbuild_plugins",
+    node_repository = "node16",
+    pnpm_lock = "//examples/plugins:pnpm-lock.yaml",
+)
+
+load("@esbuild_plugins//:repositories.bzl", _esbuild_plugin_repositories = "npm_repositories")
+
+_esbuild_plugin_repositories()
 
 # For running our own unit tests
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")

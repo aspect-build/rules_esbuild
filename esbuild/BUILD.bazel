@@ -30,7 +30,6 @@ bzl_library(
     visibility = ["//visibility:public"],
     deps = [
         "//esbuild/private:esbuild",
-        "@aspect_rules_js//js:nodejs_binary",
         "@bazel_skylib//lib:types",
         "@bazel_skylib//rules:write_file",
     ],

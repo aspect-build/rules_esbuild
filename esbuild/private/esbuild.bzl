@@ -1,6 +1,7 @@
 "esbuild rule"
 
 load("@aspect_bazel_lib//lib:expand_make_vars.bzl", "expand_variables")
+load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_files_to_bin_actions")
 load("@rules_nodejs//nodejs:providers.bzl", "JSModuleInfo")
 load(":helpers.bzl", "desugar_entry_point_names", "filter_files", "resolve_entry_point", "write_args_file", "write_jsconfig_file")
 
@@ -199,9 +200,9 @@ def _esbuild_impl(ctx):
 
     deps_inputs = depset(transitive = deps_depsets).to_list()
 
-    inputs = deps_inputs + ctx.files.srcs + filter_files(entry_points)
+    inputs = deps_inputs + copy_files_to_bin_actions(ctx, ctx.files.srcs + filter_files(entry_points))
 
-    inputs = [d for d in inputs if not (d.path.endswith(".d.ts") or d.path.endswith(".tsbuildinfo"))]
+    inputs = copy_files_to_bin_actions(ctx, [d for d in inputs if not (d.path.endswith(".d.ts") or d.path.endswith(".tsbuildinfo"))])
 
     outputs = []
 
@@ -216,7 +217,7 @@ def _esbuild_impl(ctx):
         ]),
         # the entry point files to bundle
         "entryPoints": [
-            resolve_entry_point(entry_point, inputs, ctx.files.srcs).path
+            resolve_entry_point(entry_point, inputs, ctx.files.srcs).short_path
             for entry_point in entry_points
         ],
         "external": ctx.attr.external,
@@ -276,14 +277,15 @@ def _esbuild_impl(ctx):
         if ctx.attr.format:
             args.update({"format": ctx.attr.format})
 
-        args.update({"outfile": js_out.path})
+        args.update({"outfile": js_out.short_path})
 
     jsconfig_file = write_jsconfig_file(ctx, path_alias_mappings)
     inputs.append(jsconfig_file)
-    args.update({"tsconfig": jsconfig_file.path})
+    args.update({"tsconfig": jsconfig_file.short_path})
 
     env = {
-        "ESBUILD_BINARY_PATH": esbuild_toolinfo.target_tool_path,
+        "BAZEL_BINDIR": ctx.bin_dir.path,
+        "ESBUILD_BINARY_PATH": "../../../" + esbuild_toolinfo.target_tool_path,
     }
 
     if ctx.attr.max_threads > 0:
@@ -298,17 +300,17 @@ def _esbuild_impl(ctx):
 
     args_file = write_args_file(ctx, args)
     inputs.append(args_file)
-    launcher_args.add("--esbuild_args=%s" % args_file.path)
+    launcher_args.add("--esbuild_args=%s" % args_file.short_path)
 
     # add metafile
     meta_file = ctx.actions.declare_file("%s_metadata.json" % ctx.attr.name)
     outputs.append(meta_file)
-    launcher_args.add("--metafile=%s" % meta_file.path)
+    launcher_args.add("--metafile=%s" % meta_file.short_path)
 
     # add reference to the users args file, these are merged within the launcher
     if ctx.attr.args_file:
         inputs.append(ctx.file.args_file)
-        launcher_args.add("--user_args=%s" % ctx.file.args_file.path)
+        launcher_args.add("--user_args=%s" % ctx.file.args_file.short_path)
 
     if ctx.attr.config:
         if JSModuleInfo in ctx.attr.config:
@@ -317,10 +319,10 @@ def _esbuild_impl(ctx):
                 fail("Expected only one source file: the configuration entrypoint")
 
             inputs.append(configs[0])
-            launcher_args.add("--config_file=%s" % configs[0].path)
+            launcher_args.add("--config_file=%s" % configs[0].short_path)
         else:
             inputs.append(ctx.file.config)
-            launcher_args.add("--config_file=%s" % ctx.file.config.path)
+            launcher_args.add("--config_file=%s" % ctx.file.config.short_path)
 
     # stamp = ctx.attr.node_context_data[NodeContextInfo].stamp
     # if stamp:
