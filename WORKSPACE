@@ -48,7 +48,7 @@ load("@aspect_rules_js//js:npm_import.bzl", "translate_pnpm_lock")
 translate_pnpm_lock(
     name = "esbuild_plugins",
     node_repository = "node16",
-    pnpm_lock = "//examples/plugins:pnpm-lock.json",
+    pnpm_lock = "//examples/plugins:pnpm-lock.yaml",
 )
 
 load("@esbuild_plugins//:repositories.bzl", _esbuild_plugin_repositories = "npm_repositories")
