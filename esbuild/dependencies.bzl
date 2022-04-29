@@ -26,9 +26,9 @@ def rules_esbuild_dependencies():
     maybe(
         http_archive,
         name = "aspect_bazel_lib",
-        sha256 = "f8ae724cd54c3284892ebaf5a308ed0760a18cc0cc73ff64e0325b7556437201",
-        strip_prefix = "bazel-lib-0.9.4",
-        url = "https://github.com/aspect-build/bazel-lib/archive/refs/tags/v0.9.4.tar.gz",
+        sha256 = "2f6f04a002a9f988ae79107a91a8498892fb03bee978a8bf841eb1bd9fded2ea",
+        strip_prefix = "bazel-lib-0.9.8",
+        url = "https://github.com/aspect-build/bazel-lib/archive/refs/tags/v0.9.8.tar.gz",
     )
     maybe(
         http_archive,

@@ -65,14 +65,6 @@ def rules_esbuild_internal_deps():
 
     maybe(
         http_archive,
-        name = "aspect_bazel_lib",
-        sha256 = "2f6f04a002a9f988ae79107a91a8498892fb03bee978a8bf841eb1bd9fded2ea",
-        strip_prefix = "bazel-lib-0.9.8",
-        url = "https://github.com/aspect-build/bazel-lib/archive/refs/tags/v0.9.8.tar.gz",
-    )
-
-    maybe(
-        http_archive,
         name = "aspect_rules_ts",
         sha256 = "07e6623b246d2c1d4c4024edb051fc92a824ac5e6029cb19ba639dc6bcd5973b",
         strip_prefix = "rules_ts-0.1.0",
