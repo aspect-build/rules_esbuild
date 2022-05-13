@@ -39,7 +39,7 @@ load("//esbuild:repositories.bzl", "esbuild_register_toolchains")
 
 esbuild_register_toolchains(
     name = "esbuild14",
-    esbuild_version = "0.14.36",
+    esbuild_version = "0.14.39",
 )
 
 # Install additional packages to test esbuild plugins

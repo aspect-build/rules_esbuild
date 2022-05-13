@@ -8,6 +8,8 @@ load("@aspect_rules_js//js:npm_import.bzl", "npm_import")
 load("//esbuild/private:toolchains_repo.bzl", "PLATFORMS", "toolchains_repo")
 load("//esbuild/private:versions.bzl", "TOOL_VERSIONS")
 
+LATEST_VERSION = TOOL_VERSIONS.keys()[-1]
+
 _DOC = "Fetch external tools needed for esbuild toolchain"
 _ATTRS = {
     "esbuild_version": attr.string(mandatory = True, values = TOOL_VERSIONS.keys()),
