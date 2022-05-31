@@ -37,14 +37,14 @@ load("@aspect_rules_esbuild//esbuild:toolchain.bzl", "esbuild_toolchain")
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "link_js_package")
 
 link_js_package(
-    name = "jsp__esbuild",
+    name = "link_esbuild",
     src = "@npm__esbuild_{version}//:jsp",
 )
 
 js_binary(
     name = "launcher",
     entry_point = "launcher.js",
-    data = ["//:jsp__esbuild"],
+    data = ["//:link_esbuild"],
 )
 
 esbuild_toolchain(
