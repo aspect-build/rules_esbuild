@@ -1,7 +1,7 @@
 "esbuild rule"
 
 load("@aspect_bazel_lib//lib:expand_make_vars.bzl", "expand_variables")
-load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_files_to_bin_actions")
+load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_file_to_bin_action", "copy_files_to_bin_actions")
 load("@rules_nodejs//nodejs:providers.bzl", "JSModuleInfo")
 load(":helpers.bzl", "desugar_entry_point_names", "filter_files", "resolve_entry_point", "write_args_file", "write_jsconfig_file")
 
@@ -318,10 +318,10 @@ def _esbuild_impl(ctx):
             if len(configs) != 1:
                 fail("Expected only one source file: the configuration entrypoint")
 
-            inputs.append(configs[0])
+            inputs.append(copy_file_to_bin_action(ctx, configs[0]))
             launcher_args.add("--config_file=%s" % configs[0].short_path)
         else:
-            inputs.append(ctx.file.config)
+            inputs.append(copy_file_to_bin_action(ctx, ctx.file.config))
             launcher_args.add("--config_file=%s" % ctx.file.config.short_path)
 
     # stamp = ctx.attr.node_context_data[NodeContextInfo].stamp

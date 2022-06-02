@@ -1,17 +1,11 @@
-load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
 load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
 load("@esbuild_plugins//:defs.bzl", "link_js_packages")
 
 link_js_packages()
 
-copy_to_bin(
-    name = "to_bin",
-    srcs = ["esbuild.config.mjs"],
-)
-
 esbuild(
     name = "bundle",
     srcs = ["logo.svg"],
-    config = "to_bin",
+    config = "esbuild.config.mjs",
     entry_point = "main.js",
 )
