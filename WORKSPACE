@@ -43,9 +43,9 @@ esbuild_register_toolchains(
 )
 
 # Install additional packages to test esbuild plugins
-load("@aspect_rules_js//npm:npm_import.bzl", "translate_pnpm_lock")
+load("@aspect_rules_js//npm:npm_import.bzl", "npm_translate_lock")
 
-translate_pnpm_lock(
+npm_translate_lock(
     name = "esbuild_plugins",
     pnpm_lock = "//examples/plugins:pnpm-lock.yaml",
 )

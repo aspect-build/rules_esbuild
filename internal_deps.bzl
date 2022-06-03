@@ -66,7 +66,7 @@ def rules_esbuild_internal_deps():
     maybe(
         http_archive,
         name = "aspect_rules_ts",
-        sha256 = "8e420a00e7b2fc8bdbb5dbabdbc796cafa277c057054571855260799cc8c63d0",
-        strip_prefix = "rules_ts-0.4.0",
-        url = "https://github.com/aspect-build/rules_ts/archive/refs/tags/v0.4.0.tar.gz",
+        sha256 = "1f4854ac104881b62d341c19d6150d32ba582351b24a1f0b761c218456057017",
+        strip_prefix = "rules_ts-0.5.0",
+        url = "https://github.com/aspect-build/rules_ts/archive/refs/tags/v0.5.0.tar.gz",
     )
