@@ -1,11 +1,14 @@
 load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
-load("@esbuild_plugins//:defs.bzl", "link_js_packages")
+load("@esbuild_plugins//:defs.bzl", "link_all_npm_packages")
 
-link_js_packages()
+link_all_npm_packages(name = "node_modules")
 
 esbuild(
     name = "bundle",
-    srcs = ["logo.svg"],
+    srcs = [
+        "logo.svg",
+        ":node_modules/esbuild-plugin-svg",
+    ],
     config = "esbuild.config.mjs",
     entry_point = "main.js",
 )
