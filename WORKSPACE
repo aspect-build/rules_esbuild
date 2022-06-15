@@ -18,10 +18,6 @@ load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
 
 rules_js_dependencies()
 
-load("@aspect_rules_ts//ts:repositories.bzl", "LATEST_VERSION", "rules_ts_dependencies")
-
-rules_ts_dependencies(ts_version = LATEST_VERSION)
-
 load("@aspect_bazel_lib//lib:repositories.bzl", "DEFAULT_YQ_VERSION", "register_yq_toolchains")
 
 register_yq_toolchains(

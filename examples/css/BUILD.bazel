@@ -1,27 +1,11 @@
 "Example from https://esbuild.github.io/content-types/#css-from-js"
 
 load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
-load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
-load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
 load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
-
-# esbuild only knows how to resolve the css file relative to the location of the .js file it sees.
-# Since the .js is produced in bazel-bin by the ts_project rule, we need to copy the .css file
-# there as well.
-copy_to_bin(
-    name = "to_bin",
-    srcs = ["button.css"],
-)
-
-ts_project(
-    name = "compile",
-    srcs = ["app.tsx"],
-    data = ["to_bin"],
-    preserve_jsx = True,
-)
 
 esbuild(
     name = "with_css",
+    srcs = ["button.css"],
     config = {
         "keepNames": True,
         "resolveExtensions": [
@@ -30,7 +14,6 @@ esbuild(
     },
     entry_point = "app.jsx",
     output_css = "with_css.css",
-    deps = [":compile"],
 )
 
 write_source_files(
