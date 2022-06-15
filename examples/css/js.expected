@@ -3,11 +3,8 @@
   var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
   // examples/css/app.jsx
-  var Button = /* @__PURE__ */ __name(function(_a) {
-    var text = _a.text;
-    return React.createElement("div", {
-      className: "button"
-    }, text);
-  }, "Button");
+  var Button = /* @__PURE__ */ __name(({ text }) => React.createElement("div", {
+    className: "button"
+  }, text), "Button");
 })();
 //# sourceMappingURL=with_css.js.map

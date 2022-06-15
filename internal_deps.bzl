@@ -62,11 +62,3 @@ def rules_esbuild_internal_deps():
             "https://github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
         ],
     )
-
-    maybe(
-        http_archive,
-        name = "aspect_rules_ts",
-        sha256 = "b79eca71668f1d5e318c25a25a5f9a150d351cbfab1ea9e225b0ee7a9f16763d",
-        strip_prefix = "rules_ts-0.6.0",
-        url = "https://github.com/aspect-build/rules_ts/archive/refs/tags/v0.6.0.tar.gz",
-    )
