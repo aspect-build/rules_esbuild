@@ -2,7 +2,7 @@
 
 load("@aspect_bazel_lib//lib:expand_make_vars.bzl", "expand_variables")
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_file_to_bin_action", "copy_files_to_bin_actions")
-load(":helpers.bzl", "desugar_entry_point_names", "filter_files", "resolve_entry_point", "write_args_file", "write_jsconfig_file")
+load(":helpers.bzl", "desugar_entry_point_names", "filter_files", "write_args_file")
 
 _ATTRS = {
     "args_file": attr.label(
@@ -163,10 +163,6 @@ def _esbuild_impl(ctx):
 
     deps_depsets = []
 
-    # Path alias mapings are used to create a jsconfig with mappings so that esbuild
-    # how to resolve custom package or module names
-    path_alias_mappings = dict()
-
     for dep in ctx.attr.deps:
         if hasattr(dep, "files"):
             deps_depsets.append(dep.files)
@@ -194,10 +190,7 @@ def _esbuild_impl(ctx):
             for k, v in ctx.attr.define.items()
         ]),
         # the entry point files to bundle
-        "entryPoints": [
-            resolve_entry_point(entry_point, inputs, ctx.files.srcs).short_path
-            for entry_point in entry_points
-        ],
+        "entryPoints": [entry_point.short_path for entry_point in entry_points],
         "external": ctx.attr.external,
         # by default the log level is "info" and includes an output file summary
         # under bazel this is slightly redundant and may lead to spammy logs
@@ -256,10 +249,6 @@ def _esbuild_impl(ctx):
             args.update({"format": ctx.attr.format})
 
         args.update({"outfile": js_out.short_path})
-
-    jsconfig_file = write_jsconfig_file(ctx, path_alias_mappings)
-    inputs.append(jsconfig_file)
-    args.update({"tsconfig": jsconfig_file.short_path})
 
     env = {
         "BAZEL_BINDIR": ctx.bin_dir.path,
