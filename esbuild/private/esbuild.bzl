@@ -2,7 +2,6 @@
 
 load("@aspect_bazel_lib//lib:expand_make_vars.bzl", "expand_variables")
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_file_to_bin_action", "copy_files_to_bin_actions")
-load("@rules_nodejs//nodejs:providers.bzl", "JSModuleInfo")
 load(":helpers.bzl", "desugar_entry_point_names", "filter_files", "resolve_entry_point", "write_args_file", "write_jsconfig_file")
 
 _ATTRS = {
@@ -67,10 +66,6 @@ See https://esbuild.github.io/api/#format for more details
         executable = True,
         doc = "Override the default esbuild wrapper, which is supplied by the esbuild toolchain",
         cfg = "exec",
-    ),
-    "link_workspace_root": attr.bool(
-        doc = """Link the workspace root to the bin_dir to support absolute requires like 'my_wksp/path/to/file'.
-If source files need to be required then they can be copied to the bin_dir with copy_to_bin.""",
     ),
     "max_threads": attr.int(
         mandatory = False,
@@ -166,8 +161,6 @@ def _esbuild_impl(ctx):
     node_toolinfo = ctx.toolchains["@rules_nodejs//nodejs:toolchain_type"].nodeinfo
     esbuild_toolinfo = ctx.toolchains["@aspect_rules_esbuild//esbuild:toolchain_type"].esbuildinfo
 
-    # For each dep, JSEcmaScriptModuleInfo is used if found, then JSModuleInfo and finally
-    # the DefaultInfo files are used if the former providers are not found.
     deps_depsets = []
 
     # Path alias mapings are used to create a jsconfig with mappings so that esbuild
@@ -175,26 +168,11 @@ def _esbuild_impl(ctx):
     path_alias_mappings = dict()
 
     for dep in ctx.attr.deps:
-        # if JSEcmaScriptModuleInfo in dep:
-        #     deps_depsets.append(dep[JSEcmaScriptModuleInfo].sources)
-
-        if JSModuleInfo in dep:
-            deps_depsets.append(dep[JSModuleInfo].sources)
-        elif hasattr(dep, "files"):
+        if hasattr(dep, "files"):
             deps_depsets.append(dep.files)
 
         if DefaultInfo in dep:
             deps_depsets.append(dep[DefaultInfo].data_runfiles.files)
-
-        # if ExternalNpmPackageInfo in dep:
-        #     deps_depsets.append(dep[ExternalNpmPackageInfo].sources)
-
-        # Collect the path alias mapping to resolve packages correctly
-        # if LinkerPackageMappingInfo in dep:
-        #     for key, value in dep[LinkerPackageMappingInfo].mappings.items():
-        #         # key is of format "package_name:package_path"
-        #         package_name = key.split(":")[0]
-        #         path_alias_mappings.update(generate_path_mapping(package_name, value.replace(ctx.bin_dir.path + "/", "")))
 
     entry_points = desugar_entry_point_names(ctx.file.entry_point, ctx.files.entry_points)
 
@@ -313,16 +291,8 @@ def _esbuild_impl(ctx):
         launcher_args.add("--user_args=%s" % ctx.file.args_file.short_path)
 
     if ctx.attr.config:
-        if JSModuleInfo in ctx.attr.config:
-            configs = ctx.attr.config[JSModuleInfo].sources.to_list()
-            if len(configs) != 1:
-                fail("Expected only one source file: the configuration entrypoint")
-
-            inputs.append(copy_file_to_bin_action(ctx, configs[0]))
-            launcher_args.add("--config_file=%s" % configs[0].short_path)
-        else:
-            inputs.append(copy_file_to_bin_action(ctx, ctx.file.config))
-            launcher_args.add("--config_file=%s" % ctx.file.config.short_path)
+        inputs.append(copy_file_to_bin_action(ctx, ctx.file.config))
+        launcher_args.add("--config_file=%s" % ctx.file.config.short_path)
 
     # stamp = ctx.attr.node_context_data[NodeContextInfo].stamp
     # if stamp:
@@ -342,8 +312,6 @@ def _esbuild_impl(ctx):
         mnemonic = "esbuild",
         env = env,
         executable = launcher,
-        # link_workspace_root = ctx.attr.link_workspace_root,
-        # tools = esbuild_toolinfo.tool_files,
     )
 
     outputs_depset = depset(outputs)
@@ -351,10 +319,6 @@ def _esbuild_impl(ctx):
     return [
         DefaultInfo(
             files = outputs_depset,
-        ),
-        JSModuleInfo(
-            direct_sources = outputs_depset,
-            sources = outputs_depset,
         ),
     ]
 
