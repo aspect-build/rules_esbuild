@@ -35,15 +35,14 @@ def rules_esbuild_dependencies():
     maybe(
         http_archive,
         name = "aspect_rules_js",
-        sha256 = "1fe40fd2819745ad19b5bec8f97a82087145fc6f145d3c84b0147899bf3490ca",
-        strip_prefix = "rules_js-0.13.0",
-        url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v0.13.0.tar.gz",
+        sha256 = "529a7100fd757d1fe6d39901688b0ae4cfe033b7d432e9c4cfc022f33e3ec7fc",
+        strip_prefix = "rules_js-1.0.0-beta.2",
+        url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.0.0-beta.2.tar.gz",
     )
 
     maybe(
         http_archive,
         name = "rules_nodejs",
-        sha256 = "48146434180db3f5be9be0890d58cf3250cc81acc652a04816aea0c0d06cfbd9",
-        strip_prefix = "rules_nodejs-cd48e24da0f44b9f49cb4b0254a8747b987970fe",
-        url = "https://github.com/gregmagolan/rules_nodejs/archive/cd48e24da0f44b9f49cb4b0254a8747b987970fe.tar.gz",
+        sha256 = "4d48998e3fa1e03c684e6bdf7ac98051232c7486bfa412e5b5475bbaec7bb257",
+        urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.0/rules_nodejs-core-5.5.0.tar.gz"],
     )
