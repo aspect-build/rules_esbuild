@@ -1,0 +1,39 @@
+load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@aspect_bazel_lib//lib:copy_file.bzl", "copy_file")
+load("@aspect_bazel_lib//lib:directory_path.bzl", "directory_path")
+load("@aspect_bazel_lib//lib:output_files.bzl", "output_files")
+load("//examples:asserts.bzl", "assert_contains")
+
+
+esbuild(
+    name = "bundle",
+    entry_point = "index.ts",
+    splitting = True,
+)
+
+output_files(
+    name = "bundle_directory",
+    target = ":bundle",
+    paths = ["examples/splitting/bundle"],
+)
+
+directory_path(
+    name = "index_directory_path",
+    directory = ":bundle_directory",
+    path = "index.js",
+)
+
+# the result of directory_path is a DirectoryPathInfo provider but we want to be able to reference the file directly from assert_contains
+copy_file(
+    name = "index",
+    src = ":index_directory_path",
+    out = "index.js"
+)
+
+assert_contains(
+    name = "test",
+    actual = ":index",
+    expected = """// examples/splitting/index.ts
+console.log("Hello world");
+//# sourceMappingURL=index.js.map""",
+)
