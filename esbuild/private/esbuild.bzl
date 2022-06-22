@@ -230,7 +230,7 @@ def _esbuild_impl(ctx):
 
         # disable the log limit and show all logs
         args.update({
-            "outdir": js_out.path,
+            "outdir": js_out.short_path,
         })
     else:
         js_out = ctx.outputs.output
