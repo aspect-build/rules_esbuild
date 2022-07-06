@@ -1,0 +1,15 @@
+load("@aspect_rules_js//npm:defs.bzl", "npm_package")
+load("@aspect_rules_js//js:defs.bzl", "js_library")
+
+js_library(
+    name = "js",
+    srcs = ["index.js"],
+    deps = [],
+)
+
+npm_package(
+    name = "npm_package",
+    srcs = [":js"],
+    package = "@myorg/js_lib",
+    visibility = ["//visibility:public"],
+)
