@@ -1,0 +1,32 @@
+load("@aspect_rules_js//npm:defs.bzl", "npm_link_package")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+npm_link_package(
+    name = "node_modules/@myorg/js_lib",
+    src = "//js_lib:npm_package",
+)
+
+npm_link_package(
+    name = "node_modules/@myorg/js_lib2",
+    src = "//js_lib2:npm_package",
+)
+
+ts_project(
+    name = "main",
+    srcs = ["main.ts"],
+    tsconfig = {},
+    deps = ["//:node_modules/@myorg/js_lib2"],
+)
+
+esbuild(
+    name = "bundle",
+    entry_point = "main.js",
+    deps = [":main"],
+)
+
+build_test(
+    name = "test",
+    targets = [":bundle"],
+)
