@@ -1,0 +1,54 @@
+load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@aspect_rules_js//js:defs.bzl", "js_library")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@aspect_rules_js//npm:defs.bzl", "npm_package")
+
+# Source consuming that named library
+js_library(
+    name = "consumer",
+    srcs = ["src/consumer.js"],
+    deps = [
+        "//:node_modules/numeral",
+        "//:npm-link-example/lib",
+    ],
+)
+
+# Source consuming that named library
+js_library(
+    name = "spec",
+    srcs = ["src/spec.js"],
+    deps = [":consumer"],
+)
+
+# Run esbuild on the consuming code
+esbuild(
+    name = "bundle",
+    entry_point = "src/consumer.js",
+    output_dir = True,
+    deps = [":consumer"],
+)
+
+# Test that it builds
+build_test(
+    name = "test",
+    targets = [":bundle"],
+)
+
+# A named + linked library
+npm_package(
+    name = "npm_package",
+    srcs = [
+        "src/consumer.js",
+        ":_package_json",
+    ],
+    package = "@test-example/consumer",
+    visibility = ["//visibility:public"],
+)
+
+write_file(
+    name = "_package_json",
+    out = "package.json",
+    content = ["""{"name": "@test-example/consumer", "main": "./src/consumer.js"}"""],
+    visibility = ["//visibility:public"],
+)
