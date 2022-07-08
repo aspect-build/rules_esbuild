@@ -74,6 +74,11 @@ This can be useful if running many esbuild rule invocations in parallel, which h
 For general use, leave this attribute unset.
     """,
     ),
+    "metafile": attr.bool(
+        default = False,
+        doc = "If true, esbuild creates a metafile along with the output",
+        mandatory = False,
+    ),
     "minify": attr.bool(
         default = False,
         doc = """Minifies the bundle with the built in minification.
@@ -197,7 +202,7 @@ def _esbuild_impl(ctx):
         # Also disable the log limit and show all logs
         "logLevel": "warning",
         "logLimit": 0,
-        "metafile": True,
+        "metafile": ctx.attr.metafile,
         "platform": ctx.attr.platform,
         "preserveSymlinks": True,
         "sourcesContent": ctx.attr.sources_content,
@@ -269,10 +274,11 @@ def _esbuild_impl(ctx):
     inputs.append(args_file)
     launcher_args.add("--esbuild_args=%s" % args_file.short_path)
 
-    # add metafile
-    meta_file = ctx.actions.declare_file("%s_metadata.json" % ctx.attr.name)
-    outputs.append(meta_file)
-    launcher_args.add("--metafile=%s" % meta_file.short_path)
+    if ctx.attr.metafile:
+        # add metafile
+        meta_file = ctx.actions.declare_file("%s_metadata.json" % ctx.attr.name)
+        outputs.append(meta_file)
+        launcher_args.add("--metafile=%s" % meta_file.short_path)
 
     # add reference to the users args file, these are merged within the launcher
     if ctx.attr.args_file:
