@@ -8,9 +8,24 @@ esbuild(
         "name.js",
     ],
     entry_point = "main.js",
+    metafile = True,
 )
 
 build_test(
     name = "test",
     targets = [":lib"],
+)
+
+sh_test(
+    name = "metafile_test",
+    size = "small",
+    srcs = [
+        "metafile_test.sh",
+    ],
+    args = [
+        "$(locations :lib)",
+    ],
+    data = [
+        ":lib",
+    ],
 )
