@@ -43,7 +43,9 @@ build_test(
     targets = [":bundle"],
 )
 
-# Test that spec builds
+# The spec file import the in-direct dependency lib
+# through consumer.
+# Test that spec bundle should also build
 build_test(
     name = "test_spec",
     targets = [":spec_bundle"],
