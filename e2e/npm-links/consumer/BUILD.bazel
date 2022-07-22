@@ -29,10 +29,24 @@ esbuild(
     deps = [":consumer"],
 )
 
+# Run esbuild on the consuming spec code
+esbuild(
+    name = "spec_bundle",
+    entry_point = "src/spec.js",
+    output_dir = True,
+    deps = [":spec"],
+)
+
 # Test that it builds
 build_test(
     name = "test",
     targets = [":bundle"],
+)
+
+# Test that spec builds
+build_test(
+    name = "test_spec",
+    targets = [":spec_bundle"],
 )
 
 # A named + linked library
