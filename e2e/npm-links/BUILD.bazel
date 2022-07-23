@@ -1,0 +1,18 @@
+load("@aspect_rules_js//npm:defs.bzl", "npm_link_package")
+load("@npm//:defs.bzl", "npm_link_all_packages")
+
+LIBRARIES = [
+    "lib",
+    "consumer",
+]
+
+[
+    npm_link_package(
+        name = "npm-link-example/%s" % lib,
+        src = "//%s:npm_package" % lib,
+    )
+    for lib in LIBRARIES
+]
+
+# Link npm packages
+npm_link_all_packages(name = "node_modules")
