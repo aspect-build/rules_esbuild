@@ -97,6 +97,26 @@ async function processConfigFile(configFilePath, existingArgs = {}) {
   }, {})
 }
 
+const bazelSandboxAwareOnResolvePlugin = {
+  name: 'Bazel Sandbox Guard',
+  setup(build) {
+    const BAZEL_BINDIR = process.env.BAZEL_BINDIR
+
+    build.onResolve({ filter: /.*/ }, args => {
+      if (args.resolveDir.indexOf(BAZEL_BINDIR) === -1) {
+        return {
+          errors: [
+            {
+              text: `Failed to resolve import '${args.path}'. Ensure that it is a dependency of an upstream target`,
+              location: null,
+            }
+          ]
+        }
+      }
+    })
+  }
+}
+
 if (!process.env.ESBUILD_BINARY_PATH) {
   console.error('Expected environment variable ESBUILD_BINARY_PATH to be set')
   process.exit(1)
@@ -116,6 +136,18 @@ async function runOneBuild(args, userArgsFilePath, configFilePath) {
       ...args,
       ...config,
     }
+  }
+
+  // If running under rules_js, add a plugin that attempts to keep resolves within the bin dir.
+  if (process.env.BAZEL_BINDIR) {
+    if (args.hasOwnProperty('plugins')) {
+      args.plugins.push(bazelSandboxAwareOnResolvePlugin)
+    } else {
+      args.plugins = [bazelSandboxAwareOnResolvePlugin]
+    }
+
+    // Never preserve symlinks as this breaks the pnpm node_modules layout.
+    args.preserveSymlinks = false
   }
 
   try {
