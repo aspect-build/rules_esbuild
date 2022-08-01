@@ -2,6 +2,8 @@
 
 load("@aspect_bazel_lib//lib:expand_make_vars.bzl", "expand_variables")
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_file_to_bin_action", "copy_files_to_bin_actions")
+load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
+load("@aspect_rules_js//js:providers.bzl", "JsInfo", "js_info")
 load(":helpers.bzl", "desugar_entry_point_names", "filter_files", "write_args_file")
 
 _ATTRS = {
@@ -28,9 +30,10 @@ See https://esbuild.github.io/api/#define for more details
     ),
     "deps": attr.label_list(
         default = [],
-        # aspects = [module_mappings_aspect, node_modules_aspect],
         doc = "A list of direct dependencies that are required to build the bundle",
+        providers = [JsInfo],
     ),
+    "data": js_lib_helpers.JS_LIBRARY_DATA_ATTR,
     "entry_point": attr.label(
         allow_single_file = True,
         doc = """The bundle's entry point (e.g. your main.js or app.js or index.js)
@@ -120,7 +123,7 @@ See https://esbuild.github.io/api/#platform for more details
     "sourcemap": attr.string(
         values = ["external", "inline", "both", ""],
         mandatory = False,
-        doc = """Defines where sourcemaps are output and how they are included in the bundle. By default, a separate `.js.map` file is generated and referenced by the bundle. If 'external', a separate `.js.map` file is generated but not referenced by the bundle. If 'inline', a sourcemap is generated and its contents are inlined into the bundle (and no external sourcemap file is created). If 'both', a sourcemap is inlined and a `.js.map` file is created.
+        doc = """Defines where sourcemaps are output and how they are included in the bundle. By default, a separate `.js.map` file is generated and referenced by the bundle. If `external`, a separate `.js.map` file is generated but not referenced by the bundle. If `inline`, a sourcemap is generated and its contents are inlined into the bundle (and no external sourcemap file is created). If `both`, a sourcemap is inlined and a `.js.map` file is created.
 
 See https://esbuild.github.io/api/#sourcemap for more details
     """,
@@ -166,24 +169,20 @@ def _esbuild_impl(ctx):
     node_toolinfo = ctx.toolchains["@rules_nodejs//nodejs:toolchain_type"].nodeinfo
     esbuild_toolinfo = ctx.toolchains["@aspect_rules_esbuild//esbuild:toolchain_type"].esbuildinfo
 
-    deps_depsets = []
-
-    for dep in ctx.attr.deps:
-        if hasattr(dep, "files"):
-            deps_depsets.append(dep.files)
-
-        if DefaultInfo in dep:
-            deps_depsets.append(dep[DefaultInfo].data_runfiles.files)
-
     entry_points = desugar_entry_point_names(ctx.file.entry_point, ctx.files.entry_points)
 
-    deps_inputs = depset(transitive = deps_depsets).to_list()
+    input_sources = copy_files_to_bin_actions(ctx, [
+        file
+        for file in ctx.files.srcs + filter_files(entry_points)
+        if not (file.path.endswith(".d.ts") or file.path.endswith(".tsbuildinfo"))
+    ])
 
-    inputs = deps_inputs + copy_files_to_bin_actions(ctx, ctx.files.srcs + filter_files(entry_points))
-
-    inputs = copy_files_to_bin_actions(ctx, [d for d in inputs if not (d.path.endswith(".d.ts") or d.path.endswith(".tsbuildinfo"))])
-
-    outputs = []
+    input_sources.extend(js_lib_helpers.gather_files_from_js_providers(
+        targets = ctx.attr.srcs + ctx.attr.deps,
+        include_transitive_sources = True,
+        include_declarations = False,
+        include_npm_linked_packages = True,
+    ))
 
     args = dict({
         "bundle": True,
@@ -217,7 +216,7 @@ def _esbuild_impl(ctx):
     if ctx.attr.minify:
         args.update({"minify": True})
     else:
-        # by default, esbuild will tree-shake 'pure' functions
+        # by default, esbuild will tree-shake "pure" functions
         # disable this unless also minifying
         args.update({"ignoreAnnotations": True})
 
@@ -229,9 +228,11 @@ def _esbuild_impl(ctx):
             "splitting": True,
         })
 
+    output_sources = []
+
     if ctx.attr.output_dir:
         js_out = ctx.actions.declare_directory("%s" % ctx.attr.name)
-        outputs.append(js_out)
+        output_sources.append(js_out)
 
         # disable the log limit and show all logs
         args.update({
@@ -239,16 +240,16 @@ def _esbuild_impl(ctx):
         })
     else:
         js_out = ctx.outputs.output
-        outputs.append(js_out)
+        output_sources.append(js_out)
 
         js_out_map = ctx.outputs.output_map
         if ctx.attr.sourcemap != "inline":
             if js_out_map == None:
                 fail("output_map must be specified if sourcemap is not set to 'inline'")
-            outputs.append(js_out_map)
+            output_sources.append(js_out_map)
 
         if ctx.outputs.output_css:
-            outputs.append(ctx.outputs.output_css)
+            output_sources.append(ctx.outputs.output_css)
 
         if ctx.attr.format:
             args.update({"format": ctx.attr.format})
@@ -269,24 +270,25 @@ def _esbuild_impl(ctx):
 
     # setup the args passed to the launcher
     launcher_args = ctx.actions.args()
+    other_inputs = []
 
     args_file = write_args_file(ctx, args)
-    inputs.append(args_file)
+    other_inputs.append(args_file)
     launcher_args.add("--esbuild_args=%s" % args_file.short_path)
 
     if ctx.attr.metafile:
         # add metafile
         meta_file = ctx.actions.declare_file("%s_metadata.json" % ctx.attr.name)
-        outputs.append(meta_file)
+        output_sources.append(meta_file)
         launcher_args.add("--metafile=%s" % meta_file.short_path)
 
     # add reference to the users args file, these are merged within the launcher
     if ctx.attr.args_file:
-        inputs.append(ctx.file.args_file)
+        other_inputs.append(ctx.file.args_file)
         launcher_args.add("--user_args=%s" % ctx.file.args_file.short_path)
 
     if ctx.attr.config:
-        inputs.append(copy_file_to_bin_action(ctx, ctx.file.config))
+        other_inputs.append(copy_file_to_bin_action(ctx, ctx.file.config))
         launcher_args.add("--config_file=%s" % ctx.file.config.short_path)
 
     # stamp = ctx.attr.node_context_data[NodeContextInfo].stamp
@@ -299,8 +301,8 @@ def _esbuild_impl(ctx):
 
     launcher = ctx.executable.launcher or esbuild_toolinfo.launcher.files_to_run
     ctx.actions.run(
-        inputs = inputs + node_toolinfo.tool_files + esbuild_toolinfo.tool_files,
-        outputs = outputs,
+        inputs = input_sources + other_inputs + node_toolinfo.tool_files + esbuild_toolinfo.tool_files,
+        outputs = output_sources,
         arguments = [launcher_args],
         progress_message = "%s Javascript %s [esbuild]" % ("Bundling" if not ctx.attr.output_dir else "Splitting", " ".join([entry_point.short_path for entry_point in entry_points])),
         execution_requirements = execution_requirements,
@@ -309,11 +311,41 @@ def _esbuild_impl(ctx):
         executable = launcher,
     )
 
-    outputs_depset = depset(outputs)
+    npm_linked_packages = js_lib_helpers.gather_npm_linked_packages(
+        srcs = ctx.attr.srcs,
+        deps = [],
+    )
+
+    npm_package_stores = js_lib_helpers.gather_npm_package_stores(
+        targets = ctx.attr.data,
+    )
+
+    runfiles = js_lib_helpers.gather_runfiles(
+        ctx = ctx,
+        sources = output_sources,
+        data = ctx.attr.data,
+        # Since we're bundling, we don't propogate any transitive runfiles from dependencies
+        deps = [],
+    )
 
     return [
         DefaultInfo(
-            files = outputs_depset,
+            files = depset(output_sources),
+            runfiles = runfiles,
+        ),
+        js_info(
+            npm_linked_packages = npm_linked_packages.direct,
+            npm_package_stores = npm_package_stores.direct,
+            sources = output_sources,
+            # Since we're bundling, we don't propogate linked npm packages from dependencies since
+            # they are bundled and the dependencies are dropped. If a subset of linked npm
+            # dependencies are not bundled it is up the the user to re-specify these in `data` if
+            # they are runtime dependencies to progagate to binary rules or `srcs` if they are to be
+            # propagated to downstream build targets.
+            transitive_npm_linked_packages = npm_linked_packages.direct,
+            transitive_npm_package_stores = npm_package_stores.transitive,
+            # Since we're bundling, we don't propogate any transitive sources from dependencies
+            transitive_sources = output_sources,
         ),
     ]
 
