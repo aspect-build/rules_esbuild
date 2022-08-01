@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  numeral: ^2.0.6
+  numeral: 2.0.6
 
 dependencies:
   numeral: 2.0.6
