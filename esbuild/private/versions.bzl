@@ -2,6 +2,14 @@
 
 # Use /scripts/mirror_release.sh to add a newer version below.
 TOOL_VERSIONS = {
+     "0.11.20": {
+        "npm": "sha512-QOZrVpN/Yz74xfat0H6euSgn3RnwLevY1mJTEXneukz1ln9qB+ieaerRMzSeETpz/UJWsBMzRVR/andBht5WKw==",
+        "darwin-64": "sha512-p1OH7glXN/ty1Vz9DzJqscV56Li7WvMAfAlqwEis9QlMZAmofYZZjmF+OoHNaz5gBmHX0LWsAhZLBRL1ZmNsIw==",
+        "darwin-arm64": "sha512-xCEKJ9u2rvprrcIlA0GLr8cpvc+7cxZfUPcFbGsxyGSI+60Sp2LMgzkuT0ZbbrbJXU5lICRqNlRBo+UesRcR+w==",
+        "linux-64": "sha512-SMRaWXR8CSzz6eFZkJ7749TAPWzDVx/y9GnxvxMNpJ6cIVHMDdB46zDEv6KBcRKvDXvUVWptlB0F2e7rgD74cA==",
+        "linux-arm64": "sha512-Uh6Vv5L0TVAUprlxvIONMp+MDYUjvENEyStAV+/ahd9C6orTOPWNBDrKkLDGUgvBjQ9BHSfxxmrh/YyB9oMNww==",
+        "windows-64": "sha512-NTZeBldPO86GA1iHgi/IyUy4g2gN1APgHSD5OCo1UBd8cQc6b62zjvvstTZnWrg7tBKoU4YrYHcbRkMXzjzBYg==",
+    },
     "0.13.12": {
         "npm": "sha512-vTKKUt+yoz61U/BbrnmlG9XIjwpdIxmHB8DlPR0AAW6OdS+nBQBci6LUHU2q9WbBobMEIQxxDpKbkmOGYvxsow==",
         "darwin-64": "sha384-woLxKxTkXmKpJX7+ErVWT03Z7w5eRxBGtuowTxMN//liTsTBWV8VUYQJPMTaa4+7",
