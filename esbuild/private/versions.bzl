@@ -2,7 +2,7 @@
 
 # Use /scripts/mirror_release.sh to add a newer version below.
 TOOL_VERSIONS = {
-     "0.11.20": {
+    "0.11.20": {
         "npm": "sha512-QOZrVpN/Yz74xfat0H6euSgn3RnwLevY1mJTEXneukz1ln9qB+ieaerRMzSeETpz/UJWsBMzRVR/andBht5WKw==",
         "darwin-64": "sha512-p1OH7glXN/ty1Vz9DzJqscV56Li7WvMAfAlqwEis9QlMZAmofYZZjmF+OoHNaz5gBmHX0LWsAhZLBRL1ZmNsIw==",
         "darwin-arm64": "sha512-xCEKJ9u2rvprrcIlA0GLr8cpvc+7cxZfUPcFbGsxyGSI+60Sp2LMgzkuT0ZbbrbJXU5lICRqNlRBo+UesRcR+w==",
@@ -33,5 +33,13 @@ TOOL_VERSIONS = {
         "linux-64": "sha512-4tcgFDYWdI+UbNMGlua9u1Zhu0N5R6u9tl5WOM8aVnNX143JZoBZLpCuUr5lCKhnD0SCO+5gUyMfupGrHtfggQ==",
         "linux-arm64": "sha512-23pc8MlD2D6Px1mV8GMglZlKgwgNKAO8gsgsLLcXWSs9lQsCYkIlMo/2Ycfo5JrDIbLdwgP8D2vpfH2KcBqrDQ==",
         "windows-64": "sha512-E2wm+5FwCcLpKsBHRw28bSYQw0Ikxb7zIMxw3OPAkiaQhLVr3dnVO8DofmbWhhf6b97bWzg37iSZ45ZDpLw7Ow==",
+    },
+    "0.14.51": {
+        "npm": "sha512-+CvnDitD7Q5sT7F+FM65sWkF8wJRf+j9fPcprxYV4j+ohmzVj2W7caUqH2s5kCaCJAfcAICjSlKhDCcvDpU7nw==",
+        "darwin-64": "sha512-YFmXPIOvuagDcwCejMRtCDjgPfnDu+bNeh5FU2Ryi68ADDVlWEpbtpAbrtf/lvFTWPexbgyKgzppNgsmLPr8PA==",
+        "darwin-arm64": "sha512-juYD0QnSKwAMfzwKdIF6YbueXzS6N7y4GXPDeDkApz/1RzlT42mvX9jgNmyOlWKN7YzQAYbcUEJmZJYQGdf2ow==",
+        "linux-64": "sha512-dxjhrqo5i7Rq6DXwz5v+MEHVs9VNFItJmHBe1CxROWNf4miOGoQhqSG8StStbDkQ1Mtobg6ng+4fwByOhoQoeA==",
+        "linux-arm64": "sha512-D9rFxGutoqQX3xJPxqd6o+kvYKeIbM0ifW2y0bgKk5HPgQQOo2k9/2Vpto3ybGYaFPCE5qTGtqQta9PoP6ZEzw==",
+        "windows-64": "sha512-HoN/5HGRXJpWODprGCgKbdMvrC3A2gqvzewu2eECRw2sYxOUoh2TV1tS+G7bHNapPGI79woQJGV6pFH7GH7qnA==",
     },
 }
