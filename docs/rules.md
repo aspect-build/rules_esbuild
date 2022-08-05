@@ -2,7 +2,7 @@
 
 Public API re-exports
 
-<a id="#esbuild"></a>
+<a id="esbuild"></a>
 
 ## esbuild
 
