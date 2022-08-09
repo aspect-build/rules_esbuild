@@ -203,7 +203,13 @@ def _esbuild_impl(ctx):
         "logLimit": 0,
         "metafile": ctx.attr.metafile,
         "platform": ctx.attr.platform,
-        "preserveSymlinks": True,
+        # Don't preserve symlinks since doing so breaks node_modules resolution
+        # in the pnpm-style symlinked node_modules structure.
+        # See https://pnpm.io/symlinked-node-modules-structure.
+        # NB: esbuild will currently leave the sandbox and end up in the output
+        # tree until symlink guards are created to prevent this.
+        # See https://github.com/aspect-build/rules_esbuild/pull/32.
+        "preserveSymlinks": False,
         "sourcesContent": ctx.attr.sources_content,
         "target": ctx.attr.target,
     })
