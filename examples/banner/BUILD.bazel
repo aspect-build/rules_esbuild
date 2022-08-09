@@ -33,11 +33,26 @@ esbuild(
     entry_point = "main.js",
 )
 
+# Make sed replacements for consistency on different platform
+[
+    genrule(
+        name = "sed_{}".format(basename.replace(".", "_")),
+        srcs = [":{}".format(basename)],
+        outs = ["sed_{}".format(basename)],
+        cmd = "sed \"s/\\/\\/ .*examples\\//\\/\\/ examples\\//\" $(execpath :{}) > $@".format(basename),
+    )
+    for basename in [
+        "banner_newline.js",
+        "banner_spaces.js",
+        "banner_quotes.js",
+    ]
+]
+
 write_source_files(
     name = "assertions",
     files = {
-        "newline.expected": "banner_newline.js",
-        "spaces.expected": "banner_spaces.js",
-        "quotes.expected": "banner_quotes.js",
+        "newline.expected": "sed_banner_newline.js",
+        "spaces.expected": "sed_banner_spaces.js",
+        "quotes.expected": "sed_banner_quotes.js",
     },
 )

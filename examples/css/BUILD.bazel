@@ -16,10 +16,25 @@ esbuild(
     output_css = "with_css.css",
 )
 
+# Make sed replacements for consistency on different platform
+genrule(
+    name = "sed_with_css_js",
+    srcs = [":with_css.js"],
+    outs = ["sed_with_css.js"],
+    cmd = "sed \"s/\\/\\/ .*examples\\//\\/\\/ examples\\//\" $(execpath :with_css.js) > $@",
+)
+
+genrule(
+    name = "sed_with_css_css",
+    srcs = [":with_css.css"],
+    outs = ["sed_with_css.css"],
+    cmd = "sed \"s/\\/\\* .*examples\\//\\/\\* examples\\//\" $(execpath :with_css.css) > $@",
+)
+
 write_source_files(
     name = "assertions",
     files = {
-        "css.expected": "with_css.css",
-        "js.expected": "with_css.js",
+        "css.expected": "sed_with_css.css",
+        "js.expected": "sed_with_css.js",
     },
 )
