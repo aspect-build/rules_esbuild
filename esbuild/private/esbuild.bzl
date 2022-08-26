@@ -171,19 +171,6 @@ def _esbuild_impl(ctx):
 
     entry_points = desugar_entry_point_names(ctx.file.entry_point, ctx.files.entry_points)
 
-    input_sources = copy_files_to_bin_actions(ctx, [
-        file
-        for file in ctx.files.srcs + filter_files(entry_points)
-        if not (file.path.endswith(".d.ts") or file.path.endswith(".tsbuildinfo"))
-    ])
-
-    input_sources.extend(js_lib_helpers.gather_files_from_js_providers(
-        targets = ctx.attr.srcs + ctx.attr.deps,
-        include_transitive_sources = True,
-        include_declarations = False,
-        include_npm_linked_packages = True,
-    ))
-
     args = dict({
         "bundle": True,
         "define": dict([
@@ -305,9 +292,23 @@ def _esbuild_impl(ctx):
     #     inputs.append(ctx.version_file)
     #     env["BAZEL_VERSION_FILE"] = ctx.version_file.path
 
+    input_sources = depset(
+        copy_files_to_bin_actions(ctx, [
+            file
+            for file in ctx.files.srcs + filter_files(entry_points)
+            if not (file.path.endswith(".d.ts") or file.path.endswith(".tsbuildinfo"))
+        ]) + other_inputs + node_toolinfo.tool_files + esbuild_toolinfo.tool_files,
+        transitive = [js_lib_helpers.gather_files_from_js_providers(
+            targets = ctx.attr.srcs + ctx.attr.deps,
+            include_transitive_sources = True,
+            include_declarations = False,
+            include_npm_linked_packages = True,
+        )],
+    )
+
     launcher = ctx.executable.launcher or esbuild_toolinfo.launcher.files_to_run
     ctx.actions.run(
-        inputs = input_sources + other_inputs + node_toolinfo.tool_files + esbuild_toolinfo.tool_files,
+        inputs = input_sources,
         outputs = output_sources,
         arguments = [launcher_args],
         progress_message = "%s Javascript %s [esbuild]" % ("Bundling" if not ctx.attr.output_dir else "Splitting", " ".join([entry_point.short_path for entry_point in entry_points])),
@@ -322,13 +323,15 @@ def _esbuild_impl(ctx):
         deps = [],
     )
 
-    npm_package_stores = js_lib_helpers.gather_npm_package_stores(
+    npm_package_store_deps = js_lib_helpers.gather_npm_package_store_deps(
         targets = ctx.attr.data,
     )
 
+    output_sources_depset = depset(output_sources)
+
     runfiles = js_lib_helpers.gather_runfiles(
         ctx = ctx,
-        sources = output_sources,
+        sources = output_sources_depset,
         data = ctx.attr.data,
         # Since we're bundling, we don't propogate any transitive runfiles from dependencies
         deps = [],
@@ -336,22 +339,23 @@ def _esbuild_impl(ctx):
 
     return [
         DefaultInfo(
-            files = depset(output_sources),
+            files = output_sources_depset,
             runfiles = runfiles,
         ),
         js_info(
+            npm_linked_package_files = npm_linked_packages.direct_files,
             npm_linked_packages = npm_linked_packages.direct,
-            npm_package_stores = npm_package_stores.direct,
-            sources = output_sources,
+            npm_package_store_deps = npm_package_store_deps,
+            sources = output_sources_depset,
             # Since we're bundling, we don't propogate linked npm packages from dependencies since
             # they are bundled and the dependencies are dropped. If a subset of linked npm
             # dependencies are not bundled it is up the the user to re-specify these in `data` if
             # they are runtime dependencies to progagate to binary rules or `srcs` if they are to be
             # propagated to downstream build targets.
+            transitive_npm_linked_package_files = npm_linked_packages.direct_files,
             transitive_npm_linked_packages = npm_linked_packages.direct,
-            transitive_npm_package_stores = npm_package_stores.transitive,
             # Since we're bundling, we don't propogate any transitive sources from dependencies
-            transitive_sources = output_sources,
+            transitive_sources = output_sources_depset,
         ),
     ]
 
