@@ -2,7 +2,7 @@
 
 load("@bazel_skylib//lib:types.bzl", "types")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("//esbuild/private:esbuild.bzl", _esbuild = "esbuild_bundle")
+load("//esbuild/private:esbuild.bzl", _esbuild = "esbuild_bundle", _esbuild_transpiler = "esbuild_transpiler")
 
 def esbuild(name, output_dir = False, splitting = False, config = None, **kwargs):
     """esbuild helper macro around the `esbuild_bundle` rule
@@ -62,3 +62,10 @@ def esbuild(name, output_dir = False, splitting = False, config = None, **kwargs
             deps = deps,
             **kwargs
         )
+
+esbuild_transpiler = rule(
+    implementation = _esbuild_transpiler.implementation,
+    attrs = _esbuild_transpiler.attrs,
+    toolchains = _esbuild_transpiler.toolchains,
+)
+

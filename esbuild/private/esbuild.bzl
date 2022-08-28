@@ -378,3 +378,99 @@ Runs the esbuild bundler under Bazel
 For further information about esbuild, see https://esbuild.github.io/
 """,
 )
+
+_transpiler_attrs = {
+    "srcs": attr.label_list(
+        allow_files = True,
+        default = [],
+        doc = """Source files to be made available to esbuild""",
+    ),
+    "data": js_lib_helpers.JS_LIBRARY_DATA_ATTR,
+    "js_outs": attr.output_list(doc = """list of expected JavaScript output files.
+There must be one for each entry in srcs, and in the same order."""),
+    "map_outs": attr.output_list(doc = """list of expected source map output files.
+Can be empty, meaning no source maps should be produced.
+If non-empty, there must be one for each entry in srcs, and in the same order."""),
+}
+
+def _esbuild_transpiler_impl(ctx):
+    esbuild_toolinfo = ctx.toolchains["@aspect_rules_esbuild//esbuild:toolchain_type"].esbuildinfo
+
+    args = ctx.actions.args()
+    args.add("--log-level=silent")
+
+    if ctx.outputs.map_outs:
+        # CLI doesn't let us pick the map output location
+        # We happen to use the same convention as esbuild.
+        args.add("--sourcemap=external")
+
+    for i, src in enumerate(ctx.files.srcs):
+        out = ctx.outputs.js_outs[i]
+
+        src_args = ctx.actions.args()
+        src_args.add(src)
+        src_args.add(out, format="--outfile=%s")
+
+        action_outputs = [ctx.outputs.js_outs[i]]
+        if ctx.outputs.map_outs:
+            action_outputs.append(ctx.outputs.map_outs[i])
+
+        ctx.actions.run(
+            inputs = [src],
+            executable = esbuild_toolinfo.tool_files[0],
+            arguments = [args, src_args],
+            outputs = action_outputs,
+        )
+
+
+    output_sources_depset = depset(ctx.outputs.js_outs + ctx.outputs.map_outs)
+
+    transitive_sources = js_lib_helpers.gather_transitive_sources(
+        sources = output_sources_depset,
+        targets = ctx.attr.srcs,
+    )
+
+    transitive_declarations = js_lib_helpers.gather_transitive_declarations(
+        declarations = [],
+        targets = ctx.attr.srcs,
+    )
+
+    npm_linked_packages = js_lib_helpers.gather_npm_linked_packages(
+        srcs = ctx.attr.srcs,
+        deps = [],
+    )
+
+    npm_package_store_deps = js_lib_helpers.gather_npm_package_store_deps(
+        targets = ctx.attr.data,
+    )
+
+    runfiles = js_lib_helpers.gather_runfiles(
+        ctx = ctx,
+        sources = transitive_sources,
+        data = ctx.attr.data,
+        deps = ctx.attr.srcs,
+    )
+
+    return [
+        js_info(
+            npm_linked_package_files = npm_linked_packages.direct_files,
+            npm_linked_packages = npm_linked_packages.direct,
+            npm_package_store_deps = npm_package_store_deps,
+            sources = output_sources_depset,
+            transitive_declarations = transitive_declarations,
+            transitive_npm_linked_package_files = npm_linked_packages.transitive_files,
+            transitive_npm_linked_packages = npm_linked_packages.transitive,
+            transitive_sources = transitive_sources,
+        ),
+        DefaultInfo(
+            files = output_sources_depset,
+            runfiles = runfiles,
+        ),
+    ]
+
+
+esbuild_transpiler = struct(
+    implementation = _esbuild_transpiler_impl,
+    attrs = _transpiler_attrs,
+    toolchains = lib.toolchains,
+)
