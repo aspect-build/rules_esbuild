@@ -11,16 +11,6 @@ def rules_esbuild_internal_deps():
     "Fetch deps needed for local development"
     maybe(
         http_archive,
-        name = "build_bazel_integration_testing",
-        urls = [
-            "https://github.com/bazelbuild/bazel-integration-testing/archive/7d3e9aee60e2320b1987b871cfaa85b0fca4fdd5.zip",
-        ],
-        strip_prefix = "bazel-integration-testing-7d3e9aee60e2320b1987b871cfaa85b0fca4fdd5",
-        sha256 = "f4abdacd838a10a2ac01b813664a53ddf684bb3fedf25dc35765725740cc85e3",
-    )
-
-    maybe(
-        http_archive,
         name = "io_bazel_rules_go",
         sha256 = "099a9fb96a376ccbbb7d291ed4ecbdfd42f6bc822ab77ae6f1b5cb9e914e94fa",
         urls = [
