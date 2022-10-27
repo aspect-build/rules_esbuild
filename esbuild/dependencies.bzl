@@ -3,8 +3,11 @@
 Should be replaced by bzlmod for users of Bazel 6.0 and above.
 """
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", _http_archive = "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
+
+def http_archive(name, **kwargs):
+    maybe(_http_archive, name = name, **kwargs)
 
 # WARNING: any changes in this function may be BREAKING CHANGES for users
 # because we'll fetch a dependency which may be different from one that
@@ -14,8 +17,7 @@ load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 # and released only in semver majors.
 def rules_esbuild_dependencies():
     # The minimal version of bazel_skylib we require
-    maybe(
-        http_archive,
+    http_archive(
         name = "bazel_skylib",
         sha256 = "74d544d96f4a5bb630d465ca8bbcfe231e3594e5aae57e1edbf17a6eb3ca2506",
         urls = [
@@ -24,24 +26,21 @@ def rules_esbuild_dependencies():
         ],
     )
 
-    maybe(
-        http_archive,
+    http_archive(
         name = "aspect_bazel_lib",
-        sha256 = "79381b0975ba7d2d5653239e5bab12cf54d89b10217fe771b8edd95047a2e44b",
-        strip_prefix = "bazel-lib-1.12.1",
-        url = "https://github.com/aspect-build/bazel-lib/archive/refs/tags/v1.12.1.tar.gz",
+        sha256 = "9305799c6d9e425e6b73270a0f9eb0aa1082050823a7eefad95edcece545e77b",
+        strip_prefix = "bazel-lib-1.14.0",
+        url = "https://github.com/aspect-build/bazel-lib/archive/refs/tags/v1.14.0.tar.gz",
     )
 
-    maybe(
-        http_archive,
+    http_archive(
         name = "aspect_rules_js",
-        sha256 = "9d80f28eb59df0486cc1e8e82868e97d8167429ea309a7ae96dfac64ff73275b",
-        strip_prefix = "rules_js-1.4.0",
-        url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.4.0.tar.gz",
+        sha256 = "5bb643d9e119832a383e67f946dc752b6d719d66d1df9b46d840509ceb53e1f1",
+        strip_prefix = "rules_js-1.6.2",
+        url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.6.2.tar.gz",
     )
 
-    maybe(
-        http_archive,
+    http_archive(
         name = "rules_nodejs",
         sha256 = "bce105e7a3d2a3c5eb90dcd6436544bf11f82e97073fb29e4090321ba2b84d8f",
         urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.6.0/rules_nodejs-core-5.6.0.tar.gz"],
