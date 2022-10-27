@@ -4,13 +4,15 @@ Users should *not* need to install these. If users see a load()
 statement from these, that's a bug in our distribution.
 """
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", _http_archive = "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
+
+def http_archive(name, **kwargs):
+    maybe(_http_archive, name = name, **kwargs)
 
 def rules_esbuild_internal_deps():
     "Fetch deps needed for local development"
-    maybe(
-        http_archive,
+    http_archive(
         name = "io_bazel_rules_go",
         sha256 = "099a9fb96a376ccbbb7d291ed4ecbdfd42f6bc822ab77ae6f1b5cb9e914e94fa",
         urls = [
@@ -19,8 +21,7 @@ def rules_esbuild_internal_deps():
         ],
     )
 
-    maybe(
-        http_archive,
+    http_archive(
         name = "bazel_gazelle",
         sha256 = "501deb3d5695ab658e82f6f6f549ba681ea3ca2a5fb7911154b5aa45596183fa",
         urls = [
@@ -32,8 +33,7 @@ def rules_esbuild_internal_deps():
     # Override bazel_skylib distribution to fetch sources instead
     # so that the gazelle extension is included
     # see https://github.com/bazelbuild/bazel-skylib/issues/250
-    maybe(
-        http_archive,
+    http_archive(
         name = "bazel_skylib",
         sha256 = "07b4117379dde7ab382345c3b0f5edfc6b7cff6c93756eac63da121e0bbcc5de",
         strip_prefix = "bazel-skylib-1.1.1",
@@ -43,8 +43,7 @@ def rules_esbuild_internal_deps():
         ],
     )
 
-    maybe(
-        http_archive,
+    http_archive(
         name = "io_bazel_stardoc",
         sha256 = "3fd8fec4ddec3c670bd810904e2e33170bedfe12f90adf943508184be458c8bb",
         urls = [
