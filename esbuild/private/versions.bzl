@@ -1,6 +1,7 @@
 """Info for the esbuild packages used"""
 
 # Use /scripts/mirror_release.sh to add a newer version below.
+# Versions should be ascending order so TOOL_VERSIONS.keys()[-1] is the latest version.
 TOOL_VERSIONS = {
     "0.11.20": {
         "npm": "sha512-QOZrVpN/Yz74xfat0H6euSgn3RnwLevY1mJTEXneukz1ln9qB+ieaerRMzSeETpz/UJWsBMzRVR/andBht5WKw==",
