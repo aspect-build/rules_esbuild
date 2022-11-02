@@ -16,10 +16,7 @@ def rules_esbuild_dependencies():
     http_archive(
         name = "bazel_skylib",
         sha256 = "74d544d96f4a5bb630d465ca8bbcfe231e3594e5aae57e1edbf17a6eb3ca2506",
-        urls = [
-            "https://github.com/bazelbuild/bazel-skylib/releases/download/1.3.0/bazel-skylib-1.3.0.tar.gz",
-            "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.3.0/bazel-skylib-1.3.0.tar.gz",
-        ],
+        urls = ["https://github.com/bazelbuild/bazel-skylib/releases/download/1.3.0/bazel-skylib-1.3.0.tar.gz"],
     )
 
     http_archive(
@@ -31,13 +28,13 @@ def rules_esbuild_dependencies():
 
     http_archive(
         name = "aspect_rules_js",
-        sha256 = "5bb643d9e119832a383e67f946dc752b6d719d66d1df9b46d840509ceb53e1f1",
-        strip_prefix = "rules_js-1.6.2",
-        url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.6.2.tar.gz",
+        sha256 = "02da7c546cd70751b7375b7e95f7298709f5a33fda2863c2b68dac7745bca66d",
+        strip_prefix = "rules_js-1.6.4",
+        url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.6.4.tar.gz",
     )
 
     http_archive(
         name = "rules_nodejs",
-        sha256 = "bce105e7a3d2a3c5eb90dcd6436544bf11f82e97073fb29e4090321ba2b84d8f",
-        urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.6.0/rules_nodejs-core-5.6.0.tar.gz"],
+        sha256 = "50adf0b0ff6fc77d6909a790df02eefbbb3bc2b154ece3406361dda49607a7bd",
+        urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.7.1/rules_nodejs-core-5.7.1.tar.gz"],
     )
