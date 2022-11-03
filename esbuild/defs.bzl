@@ -49,8 +49,8 @@ def esbuild(name, output_dir = False, splitting = False, config = None, **kwargs
             output = kwargs.pop("output")
 
         output_map = None
-        sourcemap = kwargs.get("sourcemap", None)
-        if sourcemap != "inline":
+        sourcemap = kwargs.get("sourcemap", True)
+        if sourcemap and sourcemap != "inline":
             output_map = "%s.map" % output
 
         _esbuild(

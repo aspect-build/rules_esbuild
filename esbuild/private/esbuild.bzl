@@ -121,9 +121,10 @@ See https://esbuild.github.io/api/#platform for more details
     """,
     ),
     "sourcemap": attr.string(
-        values = ["external", "inline", "both", ""],
+        values = ["linked", "external", "inline", "both", None],
+        default = "linked",
         mandatory = False,
-        doc = """Defines where sourcemaps are output and how they are included in the bundle. By default, a separate `.js.map` file is generated and referenced by the bundle. If `external`, a separate `.js.map` file is generated but not referenced by the bundle. If `inline`, a sourcemap is generated and its contents are inlined into the bundle (and no external sourcemap file is created). If `both`, a sourcemap is inlined and a `.js.map` file is created.
+        doc = """Defines where sourcemaps are output and how they are included in the bundle. If `linked`, a separate `.js.map` file is generated and referenced by the bundle. If `external`, a separate `.js.map` file is generated but not referenced by the bundle. If `inline`, a sourcemap is generated and its contents are inlined into the bundle (and no external sourcemap file is created). If `both`, a sourcemap is inlined and a `.js.map` file is created. If `None`, no sourcemap is generated.
 
 See https://esbuild.github.io/api/#sourcemap for more details
     """,
@@ -201,10 +202,8 @@ def _esbuild_impl(ctx):
         "target": ctx.attr.target,
     })
 
-    if len(ctx.attr.sourcemap) > 0:
+    if ctx.attr.sourcemap:
         args.update({"sourcemap": ctx.attr.sourcemap})
-    else:
-        args.update({"sourcemap": True})
 
     if ctx.attr.minify:
         args.update({"minify": True})
@@ -236,7 +235,7 @@ def _esbuild_impl(ctx):
         output_sources.append(js_out)
 
         js_out_map = ctx.outputs.output_map
-        if ctx.attr.sourcemap != "inline":
+        if ctx.attr.sourcemap and ctx.attr.sourcemap != "inline":
             if js_out_map == None:
                 fail("output_map must be specified if sourcemap is not set to 'inline'")
             output_sources.append(js_out_map)
