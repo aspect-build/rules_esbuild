@@ -72,6 +72,7 @@ jobs:
           - 'e2e/npm-links'
           - 'e2e/sourcemaps'
           - 'e2e/tsconfig'
+          - 'e2e/bundle'
         exclude:
           # Don't test macos with Bazel 5 to minimize macOS minutes (billed at 10X)
           # https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#included-storage-and-minutes

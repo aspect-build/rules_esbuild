@@ -156,6 +156,10 @@ edge16, node10, esnext). Default es2015.
 See https://esbuild.github.io/api/#target for more details
     """,
     ),
+    "bundle": attr.bool(
+        default = True,
+        doc = """If true, esbuild will bundle the input files, inlining their dependencies recursively"""
+    ),
     "config": attr.label(
         mandatory = False,
         allow_single_file = True,
@@ -192,7 +196,7 @@ def _esbuild_impl(ctx):
     tsconfig_bin_copy = copy_file_to_bin_action(ctx, ctx.file.tsconfig)
 
     args = dict({
-        "bundle": True,
+        "bundle": ctx.attr.bundle,
         "define": dict([
             [
                 k,
@@ -271,6 +275,7 @@ def _esbuild_impl(ctx):
 
         args.update({"outfile": _bin_relative_path(ctx, js_out)})
 
+
     env = {
         "BAZEL_BINDIR": ctx.bin_dir.path,
         "ESBUILD_BINARY_PATH": "../../../" + esbuild_toolinfo.target_tool_path,
@@ -342,6 +347,18 @@ def _esbuild_impl(ctx):
         executable = launcher,
     )
 
+    output_sources_depset = depset(output_sources)
+
+    transitive_sources = js_lib_helpers.gather_transitive_sources(
+        sources = output_sources_depset,
+        targets = ctx.attr.srcs,
+    )
+
+    transitive_declarations = js_lib_helpers.gather_transitive_declarations(
+        declarations = [],
+        targets = ctx.attr.srcs,
+    )
+
     npm_linked_packages = js_lib_helpers.gather_npm_linked_packages(
         srcs = ctx.attr.srcs,
         deps = [],
@@ -353,14 +370,12 @@ def _esbuild_impl(ctx):
         targets = ctx.attr.data,
     )
 
-    output_sources_depset = depset(output_sources)
-
     runfiles = js_lib_helpers.gather_runfiles(
         ctx = ctx,
         sources = output_sources_depset,
         data = ctx.attr.data,
-        # Since we're bundling, we don't propogate any transitive runfiles from dependencies
-        deps = [],
+        # Don't include transitive runfiles when bundling
+        deps = [] if ctx.attr.bundle else ctx.attr.srcs,
     )
 
     return [
@@ -373,15 +388,16 @@ def _esbuild_impl(ctx):
             npm_linked_packages = npm_linked_packages.direct,
             npm_package_store_deps = npm_package_store_deps,
             sources = output_sources_depset,
-            # Since we're bundling, we don't propogate linked npm packages from dependencies since
+            # If we're bundling, we don't propogate linked npm packages from dependencies since
             # they are bundled and the dependencies are dropped. If a subset of linked npm
             # dependencies are not bundled it is up the the user to re-specify these in `data` if
             # they are runtime dependencies to progagate to binary rules or `srcs` if they are to be
             # propagated to downstream build targets.
-            transitive_npm_linked_package_files = npm_linked_packages.direct_files,
-            transitive_npm_linked_packages = npm_linked_packages.direct,
-            # Since we're bundling, we don't propogate any transitive sources from dependencies
-            transitive_sources = output_sources_depset,
+            transitive_npm_linked_package_files = npm_linked_packages.direct_files if ctx.attr.bundle else npm_linked_packages.transitive_files,
+            transitive_npm_linked_packages = npm_linked_packages.direct if ctx.attr.bundle else npm_linked_packages.transitive,
+            # If we're bundling, we don't propogate any transitive sources from dependencies
+            transitive_sources = output_sources_depset if ctx.attr.bundle else transitive_sources,
+            transitive_declarations = depset() if ctx.attr.bundle else transitive_declarations
         ),
     ]
 
