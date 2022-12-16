@@ -5,7 +5,8 @@ See https://docs.bazel.build/versions/main/skylark/deploying.html#dependencies
 """
 
 load("@aspect_rules_js//npm:npm_import.bzl", "npm_import")
-load("//esbuild/private:toolchains_repo.bzl", "PLATFORMS", "toolchains_repo")
+load("@bazel_skylib//lib:versions.bzl", "versions")
+load("//esbuild/private:toolchains_repo.bzl", "get_platforms", "toolchains_repo")
 load("//esbuild/private:versions.bzl", "TOOL_VERSIONS")
 
 LATEST_VERSION = TOOL_VERSIONS.keys()[-1]
@@ -13,19 +14,25 @@ LATEST_VERSION = TOOL_VERSIONS.keys()[-1]
 _DOC = "Fetch external tools needed for esbuild toolchain"
 _ATTRS = {
     "esbuild_version": attr.string(mandatory = True, values = TOOL_VERSIONS.keys()),
-    "platform": attr.string(mandatory = True, values = PLATFORMS.keys()),
-    "url": attr.string(default = "https://registry.npmjs.org/esbuild-{platform}/-/esbuild-{platform}-{version}.tgz"),
+    "platform": attr.string(mandatory = True),
+    # The default doesn't appear here because the value depends on the version being used.
+    "url": attr.string(),
 }
 
 def _esbuild_repo_impl(repository_ctx):
     esbuild = TOOL_VERSIONS[repository_ctx.attr.esbuild_version]
     integrity = esbuild[repository_ctx.attr.platform]
-    url = repository_ctx.attr.url.format(
-        platform = repository_ctx.attr.platform,
-        version = repository_ctx.attr.esbuild_version,
-    )
+    url = repository_ctx.attr.url
+    if not url:
+        url = (
+            "https://registry.npmjs.org/@esbuild/{platform}/-/{platform}-{version}.tgz" if versions.is_at_least("0.16.0", repository_ctx.attr.esbuild_version) else "https://registry.npmjs.org/esbuild-{platform}/-/esbuild-{platform}-{version}.tgz"
+        )
+
     repository_ctx.download_and_extract(
-        url = url,
+        url = url.format(
+            platform = repository_ctx.attr.platform,
+            version = repository_ctx.attr.esbuild_version,
+        ),
         integrity = integrity,
     )
     repository_ctx.symlink(
@@ -88,7 +95,7 @@ esbuild version {} is not currently mirrored into rules_esbuild.
 Please instead choose one of these available versions: {}
 Or, make a PR to the repo running /scripts/mirror_release.sh to add the newest version.
 If you need custom versions, please file an issue.""".format(esbuild_version, TOOL_VERSIONS.keys()))
-    for platform in PLATFORMS.keys():
+    for platform in get_platforms(esbuild_version).keys():
         esbuild_repositories(
             name = name + "_" + platform,
             esbuild_version = esbuild_version,
@@ -99,6 +106,7 @@ If you need custom versions, please file an issue.""".format(esbuild_version, TO
 
     toolchains_repo(
         name = name + "_toolchains",
+        esbuild_version = esbuild_version,
         user_repository_name = name,
     )
 
