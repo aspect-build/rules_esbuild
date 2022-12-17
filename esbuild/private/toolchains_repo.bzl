@@ -17,10 +17,12 @@ This guidance tells us how to avoid that: we put the toolchain targets in the al
 with only the toolchain attribute pointing into the platform-specific repositories.
 """
 
+load("@bazel_skylib//lib:versions.bzl", "versions")
+
 # Add more platforms as needed to mirror all the binaries
 # published by the upstream project.
-PLATFORMS = {
-    "darwin-64": struct(
+_PLATFORMS = {
+    "darwin-x64": struct(
         compatible_with = [
             "@platforms//os:macos",
             "@platforms//cpu:x86_64",
@@ -32,7 +34,7 @@ PLATFORMS = {
             "@platforms//cpu:aarch64",
         ],
     ),
-    "linux-64": struct(
+    "linux-x64": struct(
         compatible_with = [
             "@platforms//os:linux",
             "@platforms//cpu:x86_64",
@@ -44,13 +46,24 @@ PLATFORMS = {
             "@platforms//cpu:aarch64",
         ],
     ),
-    "windows-64": struct(
+    "windows-x64": struct(
         compatible_with = [
             "@platforms//os:windows",
             "@platforms//cpu:x86_64",
         ],
     ),
 }
+
+# v0.16.0 renamed the artifacts.
+# See release notes: https://github.com/evanw/esbuild/releases/tag/v0.16.0
+# These names work for releases before that.
+def get_platforms(version):
+    if versions.is_at_least("0.16.0", version):
+        return _PLATFORMS
+    return {
+        k.replace("-x64", "-64").replace("windows", "win32"): v
+        for k, v in _PLATFORMS.items()
+    }
 
 def _toolchains_repo_impl(repository_ctx):
     # Expose a concrete toolchain which is the result of Bazel resolving the toolchain
@@ -90,7 +103,7 @@ resolved_toolchain(name = "resolved_toolchain", visibility = ["//visibility:publ
 
 """
 
-    for [platform, meta] in PLATFORMS.items():
+    for [platform, meta] in get_platforms(repository_ctx.attr.esbuild_version).items():
         build_content += """
 # Declare a toolchain Bazel will select for running the tool in an action
 # on the execution platform.
@@ -115,6 +128,7 @@ toolchains_repo = repository_rule(
     doc = """Creates a repository with toolchain definitions for all known platforms
      which can be registered or selected.""",
     attrs = {
+        "esbuild_version": attr.string(doc = "version of esbuild"),
         "user_repository_name": attr.string(doc = "what the user chose for the base name"),
     },
 )
