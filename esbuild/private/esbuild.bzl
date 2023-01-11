@@ -165,11 +165,22 @@ See https://esbuild.github.io/api/#target for more details
     ),
 }
 
+def _bin_relative_path(ctx, file):
+    prefix = ctx.bin_dir.path + "/"
+    if file.path.startswith(prefix):
+        return file.path[len(prefix):]
+
+    # Since file.path is relative to execroot, go up with ".." starting from
+    # ctx.bin_dir until we reach execroot, then join that with the file path.
+    up = "/".join([".." for _ in ctx.bin_dir.path.split("/")])
+    return up + "/" + file.path
+
 def _esbuild_impl(ctx):
     node_toolinfo = ctx.toolchains["@rules_nodejs//nodejs:toolchain_type"].nodeinfo
     esbuild_toolinfo = ctx.toolchains["@aspect_rules_esbuild//esbuild:toolchain_type"].esbuildinfo
 
     entry_points = desugar_entry_point_names(ctx.file.entry_point, ctx.files.entry_points)
+    entry_points_bin_copy = copy_files_to_bin_actions(ctx, entry_points)
 
     args = dict({
         "bundle": True,
@@ -181,7 +192,7 @@ def _esbuild_impl(ctx):
             for k, v in ctx.attr.define.items()
         ]),
         # the entry point files to bundle
-        "entryPoints": [entry_point.short_path for entry_point in entry_points],
+        "entryPoints": [_bin_relative_path(ctx, entry_point) for entry_point in entry_points_bin_copy],
         "external": ctx.attr.external,
         # by default the log level is "info" and includes an output file summary
         # under bazel this is slightly redundant and may lead to spammy logs
@@ -227,7 +238,7 @@ def _esbuild_impl(ctx):
 
         # disable the log limit and show all logs
         args.update({
-            "outdir": js_out.short_path,
+            "outdir": _bin_relative_path(ctx, js_out),
         })
     else:
         js_out = ctx.outputs.output
@@ -245,7 +256,7 @@ def _esbuild_impl(ctx):
         if ctx.attr.format:
             args.update({"format": ctx.attr.format})
 
-        args.update({"outfile": js_out.short_path})
+        args.update({"outfile": _bin_relative_path(ctx, js_out)})
 
     env = {
         "BAZEL_BINDIR": ctx.bin_dir.path,
@@ -265,22 +276,24 @@ def _esbuild_impl(ctx):
 
     args_file = write_args_file(ctx, args)
     other_inputs.append(args_file)
-    launcher_args.add("--esbuild_args=%s" % args_file.short_path)
+    launcher_args.add("--esbuild_args=%s" % _bin_relative_path(ctx, args_file))
 
     if ctx.attr.metafile:
         # add metafile
         meta_file = ctx.actions.declare_file("%s_metadata.json" % ctx.attr.name)
         output_sources.append(meta_file)
-        launcher_args.add("--metafile=%s" % meta_file.short_path)
+        launcher_args.add("--metafile=%s" % _bin_relative_path(ctx, meta_file))
 
     # add reference to the users args file, these are merged within the launcher
     if ctx.attr.args_file:
+        # TODO: Copy this to bin?
         other_inputs.append(ctx.file.args_file)
-        launcher_args.add("--user_args=%s" % ctx.file.args_file.short_path)
+        launcher_args.add("--user_args=%s" % _bin_relative_path(ctx, ctx.file.args_file))
 
     if ctx.attr.config:
-        other_inputs.append(copy_file_to_bin_action(ctx, ctx.file.config))
-        launcher_args.add("--config_file=%s" % ctx.file.config.short_path)
+        config_bin_copy = copy_file_to_bin_action(ctx, ctx.file.config)
+        other_inputs.append(config_bin_copy)
+        launcher_args.add("--config_file=%s" % _bin_relative_path(ctx, config_bin_copy))
 
     # stamp = ctx.attr.node_context_data[NodeContextInfo].stamp
     # if stamp:
@@ -293,9 +306,9 @@ def _esbuild_impl(ctx):
     input_sources = depset(
         copy_files_to_bin_actions(ctx, [
             file
-            for file in ctx.files.srcs + filter_files(entry_points)
+            for file in ctx.files.srcs
             if not (file.path.endswith(".d.ts") or file.path.endswith(".tsbuildinfo"))
-        ]) + other_inputs + node_toolinfo.tool_files + esbuild_toolinfo.tool_files,
+        ]) + entry_points_bin_copy + other_inputs + node_toolinfo.tool_files + esbuild_toolinfo.tool_files,
         transitive = [js_lib_helpers.gather_files_from_js_providers(
             targets = ctx.attr.srcs + ctx.attr.deps,
             include_transitive_sources = True,
@@ -309,7 +322,7 @@ def _esbuild_impl(ctx):
         inputs = input_sources,
         outputs = output_sources,
         arguments = [launcher_args],
-        progress_message = "%s Javascript %s [esbuild]" % ("Bundling" if not ctx.attr.output_dir else "Splitting", " ".join([entry_point.short_path for entry_point in entry_points])),
+        progress_message = "%s Javascript %s [esbuild]" % ("Bundling" if not ctx.attr.output_dir else "Splitting", " ".join([_bin_relative_path(ctx, entry_point) for entry_point in entry_points])),
         execution_requirements = execution_requirements,
         mnemonic = "esbuild",
         env = env,
