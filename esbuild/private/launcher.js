@@ -1,6 +1,9 @@
-const { readFileSync, writeFileSync } = require('fs')
+const _fs = require('fs');
+// Use the _unpatched extension of fs from
+// https://github.com/aspect-build/rules_js/pull/793.
+const { readFileSync, writeFileSync, readdirSync, realpathSync } = _fs._unpatched || _fs;
 const { pathToFileURL } = require('url')
-const { join } = require('path')
+const { join, resolve } = require('path')
 const esbuild = require('esbuild')
 
 function getFlag(flag, required = true) {
@@ -97,6 +100,25 @@ async function processConfigFile(configFilePath, existingArgs = {}) {
   }, {})
 }
 
+const bazelSandboxPlugin = {
+  name: 'Bazel Sandbox Guard',
+  setup(build) {
+    // Generate an allowlist with all the files and the targets of symlinks from
+    // the bin directory for this execution.
+    //
+    // Note that process.cwd() appears to already be BAZEL_BINDIR.
+    const sandbox = new SandboxContents(process.cwd());
+    // See https://esbuild.github.io/plugins/#on-load-arguments for docs about
+    // onLoad.
+    build.onLoad({ filter: /.*/ }, args => {
+      sandbox.checkFileIsInSandbox(args.path);
+    });
+  }
+}
+
+
+// process.exit(1);
+
 if (!process.env.ESBUILD_BINARY_PATH) {
   console.error('Expected environment variable ESBUILD_BINARY_PATH to be set')
   process.exit(1)
@@ -118,6 +140,19 @@ async function runOneBuild(args, userArgsFilePath, configFilePath) {
     }
   }
 
+  // If running under rules_js, add a plugin that attempts to restrict file
+  // system access within the sandbox.
+  if (process.env.BAZEL_BINDIR) {
+    if (args.hasOwnProperty('plugins')) {
+      args.plugins.push(bazelSandboxPlugin)
+    } else {
+      args.plugins = [bazelSandboxPlugin]
+    }
+
+    // Never preserve symlinks as this breaks the pnpm node_modules layout.
+    args.preserveSymlinks = false
+  }
+
   try {
     const result = await esbuild.build(args)
     if (result.metafile) {
@@ -128,6 +163,83 @@ async function runOneBuild(args, userArgsFilePath, configFilePath) {
     console.error(e)
     process.exit(1)
   }
+}
+
+/**
+ * An index of files within the sandbox and some methods for checking that a
+ * given path is within the sandbox.
+ */
+class SandboxContents {
+  /**
+   * @param {string} sandboxRoot Path to root of sandbox.
+   */
+  constructor(sandboxRoot) {
+    this._files = listAllFiles(sandboxRoot);
+    this._allowedPaths = new Set();
+    this._files.forEach(f => {
+      this._allowedPaths.add(f.realPathResolved);
+      this._allowedPaths.add(f.pathResolved);
+    });
+  }
+
+  /**
+   * Returns true if the given path is in the sandbox.
+   *
+   * @param {string} absPath The absolute path of some file.
+   * @returns {boolean} true if the file is in the sandbox.
+   */
+  inSandbox(absPath) {
+    return this._allowedPaths.has(absPath);
+  }
+
+  /**
+   * @returns {string} debug summary of the sandbox contents.
+   */
+  sandboxSummary(indent) {
+    indent = indent || '';
+    return this._files.map((entry) => {
+      if (entry.isSymbolicLink) {
+        return `${indent}${entry.pathResolved} ->\n${indent}  ${entry.realPathResolved}`;
+      }
+      return indent + entry.realPathResolved;
+    }).join('\n');
+  }
+
+  /**
+   * @param {string} somePath path to some file.
+   * @throws {Error} if the path is not in the sandbox.
+   */
+  checkFileIsInSandbox(somePath) {
+    const absPath = resolve(realpathSync(somePath));
+    if (this.inSandbox(absPath)) {
+      return;
+    }
+    
+    throw new Error(
+      `loaded file is not allowed because the file is not within the bazel ` +
+      `sandbox. Check the deps of the esbuild rule. \n` +
+      `${absPath} is not in list of ${this._files.length} sandbox entries:\n` + 
+      `${this.sandboxSummary()}`);
+  }
+}
+
+function listAllFiles(folder) {
+  const out = [];
+  readdirSync(folder, {withFileTypes: true}).forEach(file => {
+    const fileName = join(folder, file.name);
+    if (file.isDirectory()) {
+      out.push(...listAllFiles(fileName));
+    } else {
+      const realPath = realpathSync(fileName);
+      out.push({
+        path: fileName,
+        pathResolved: resolve(fileName),
+        isSymbolicLink: file.isSymbolicLink(),
+        realPathResolved: resolve(realPath),
+      });
+    }
+  });
+  return out;
 }
 
 runOneBuild(
