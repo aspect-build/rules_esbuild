@@ -1,4 +1,4 @@
-"esbuild rule"
+"# esbuild rule"
 
 load("@aspect_bazel_lib//lib:expand_make_vars.bzl", "expand_variables")
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_file_to_bin_action", "copy_files_to_bin_actions")

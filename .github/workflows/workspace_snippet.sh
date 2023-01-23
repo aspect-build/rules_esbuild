@@ -20,5 +20,5 @@ http_archive(
     url = "https://github.com/aspect-build/rules_esbuild/archive/refs/tags/${TAG}.tar.gz",
 )
 EOF
-awk 'f;/--SNIP--/{f=1}' e2e/workspace/WORKSPACE
+awk 'f;/--SNIP--/{f=1}' e2e/smoke/WORKSPACE.bazel
 echo "\`\`\`"

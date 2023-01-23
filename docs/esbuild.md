@@ -1,6 +1,6 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-esbuild rule
+# esbuild rule
 
 <a id="esbuild_bundle"></a>
 

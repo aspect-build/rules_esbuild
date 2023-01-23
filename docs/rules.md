@@ -1,6 +1,6 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-Public API re-exports
+# Public API
 
 <a id="esbuild"></a>
 
@@ -12,7 +12,7 @@ esbuild(<a href="#esbuild-name">name</a>, <a href="#esbuild-output_dir">output_d
 
 esbuild helper macro around the `esbuild_bundle` rule
 
-For a full list of attributes, see the `esbuild_bundle` rule
+For a full list of attributes, see the [`esbuild_bundle`]() rule
 
 
 **PARAMETERS**
