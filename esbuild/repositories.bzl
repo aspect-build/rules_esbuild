@@ -119,4 +119,6 @@ If you need custom versions, please file an issue.""".format(esbuild_version, TO
         integrity = TOOL_VERSIONS[esbuild_version]["npm"],
         package = "esbuild",
         version = esbuild_version,
+        register_copy_directory_toolchains = register,
+        register_copy_to_directory_toolchains = register,
     )
