@@ -1,4 +1,4 @@
-"Public API re-exports"
+"# Public API"
 
 load("@bazel_skylib//lib:types.bzl", "types")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
@@ -7,7 +7,7 @@ load("//esbuild/private:esbuild.bzl", _esbuild = "esbuild_bundle")
 def esbuild(name, output_dir = False, splitting = False, config = None, **kwargs):
     """esbuild helper macro around the `esbuild_bundle` rule
 
-    For a full list of attributes, see the `esbuild_bundle` rule
+    For a full list of attributes, see the [`esbuild_bundle`]() rule
 
     Args:
         name: The name used for this rule and output files

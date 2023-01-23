@@ -20,8 +20,8 @@ copy the WORKSPACE snippet into your `WORKSPACE` file.
 
 ## Usage
 
-See the API documentation in the [`docs/`](docs/) directory,
-and the example usage in the [`examples/`](examples/) directory.
+See the [API documentation](./docs/rules),
+and the example usage in the [`examples/`](https://github.com/aspect-build/rules_esbuild/tree/main/examples/) directory.
 Note that the examples rely on code in the `/WORKSPACE` file in the root of this repo.
 
 ## From a BUILD file
