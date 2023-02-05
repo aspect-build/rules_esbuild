@@ -1,6 +1,7 @@
 const { readFileSync, writeFileSync } = require('fs')
 const { pathToFileURL } = require('url')
 const { join } = require('path')
+const fs = require("fs");
 const esbuild = require('esbuild')
 
 function getFlag(flag, required = true) {
@@ -100,6 +101,9 @@ async function processConfigFile(configFilePath, existingArgs = {}) {
 if (!process.env.ESBUILD_BINARY_PATH) {
   console.error('Expected environment variable ESBUILD_BINARY_PATH to be set')
   process.exit(1)
+}
+if (!fs.existsSync(process.env.ESBUILD_BINARY_PATH)) {
+  throw new Error(`[esbuild] Bad configuration: ESBUILD_BINARY_PATH=${process.env.ESBUILD_BINARY_PATH} does not exist; likely bug in rules_esbuild or bad toolchain configuration.\n\n working directory = ${process.cwd()}`);
 }
 
 async function runOneBuild(args, userArgsFilePath, configFilePath) {
