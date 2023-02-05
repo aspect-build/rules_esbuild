@@ -31,7 +31,6 @@ def _esbuild_toolchain_impl(ctx):
     if ctx.attr.target_tool:
         tool_files = ctx.attr.target_tool.files.to_list()
         target_tool_path = _to_manifest_path(ctx, tool_files[0])
-        print("setting target_tool_path to {} from file = {}".format(target_tool_path, tool_files[0]))
 
     # Make the $(tool_BIN) variable available in places like genrules.
     # See https://docs.bazel.build/versions/main/be/make-variables.html#custom_variables
