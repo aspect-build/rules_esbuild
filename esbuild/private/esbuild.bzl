@@ -159,7 +159,7 @@ See https://esbuild.github.io/api/#target for more details
     "config": attr.label(
         mandatory = False,
         allow_single_file = True,
-        doc = """Configuration file used for esbuild. Note that options set in this file may get overwritten.
+        doc = """Configuration file used for esbuild. Note that options set in this file may get overwritten. If you formally used `args` from `@bazel/esbuild`, replace it with this attribute.
         TODO: show how to write a config file that depends on plugins, similar to the esbuild_config macro in rules_nodejs.
     """,
     ),
