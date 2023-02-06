@@ -8,6 +8,6 @@ def esbuild_help(name, out):
         # The result will be in bazel-bin/examples/macro/help
         outs = [out],
         cmd = "$(ESBUILD_BIN) --help > $@",
-        toolchains = ["@esbuild14_toolchains//:resolved_toolchain"],
-        tools = ["@esbuild14_toolchains//:resolved_toolchain"],
+        toolchains = ["@aspect_rules_esbuild//esbuild:resolved_toolchain"],
+        tools = ["@aspect_rules_esbuild//esbuild:resolved_toolchain"],
     )

@@ -35,7 +35,7 @@ If needed, instead of the macro you could call the underlying [`esbuild_bundle` 
 You could write a Bazel macro which uses esbuild, by calling it from a `genrule` or
 [`run_binary`](https://docs.aspect.build/bazelbuild/bazel-skylib/1.2.1/docs/run_binary_doc_gen.html#run_binary).
 For this purpose, you can use the `ESBUILD_BIN` Make variable exposed by the
-`@[esbuild repo name]_toolchains//:resolved_toolchain`.
+`@aspect_rules_esbuild//esbuild:resolved_toolchain`.
 This is illustrated in examples/macro.
 
 # In a custom rule
