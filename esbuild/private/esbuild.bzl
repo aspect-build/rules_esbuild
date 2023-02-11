@@ -4,7 +4,7 @@ load("@aspect_bazel_lib//lib:expand_make_vars.bzl", "expand_variables")
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_file_to_bin_action", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("@aspect_rules_js//js:providers.bzl", "JsInfo", "js_info")
-load(":helpers.bzl", "desugar_entry_point_names", "filter_files", "write_args_file")
+load(":helpers.bzl", "desugar_entry_point_names", "write_args_file")
 
 _ATTRS = {
     "args_file": attr.label(
@@ -335,6 +335,8 @@ def _esbuild_impl(ctx):
     )
 
     npm_package_store_deps = js_lib_helpers.gather_npm_package_store_deps(
+        # Since we're bundling, only propagate `data` npm packages to the direct dependencies of
+        # downstream linked `npm_package` targets instead of the common `data` and `deps` pattern.
         targets = ctx.attr.data,
     )
 
