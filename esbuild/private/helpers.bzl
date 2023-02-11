@@ -28,29 +28,6 @@ def desugar_entry_point_names(entry_point, entry_points):
         return [entry_point]
     return entry_points
 
-def filter_files(input, endings = ALLOWED_EXTENSIONS):
-    """Filters a list of files for specific endings
-
-    Args:
-        input: The depset or list of files
-        endings: The list of endings that should be filtered for
-
-    Returns:
-        Returns the filtered list of files
-    """
-
-    # Convert input into list regardles of being a depset or list
-    input_list = input.to_list() if type(input) == "depset" else input
-    filtered = []
-
-    for file in input_list:
-        for ending in endings:
-            if file.path.endswith("." + ending):
-                filtered.append(file)
-                continue
-
-    return filtered
-
 def write_args_file(ctx, args):
     args_file = ctx.actions.declare_file("%s.args.json" % ctx.attr.name)
     ctx.actions.write(
