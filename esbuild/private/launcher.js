@@ -57,7 +57,6 @@ async function processConfigFile(configFilePath, existingArgs = {}) {
     'preserveSymlinks',
     'sourcemap',
     'splitting',
-    'tsconfig',
   ]
 
   const MERGE_CONFIG_KEYS = ['define']
@@ -121,8 +120,8 @@ async function runOneBuild(args, userArgsFilePath, configFilePath) {
   try {
     const result = await esbuild.build(args)
     if (result.metafile) {
-      const metafile = getFlag('--metafile');
-      writeFileSync(metafile, JSON.stringify(result.metafile));
+      const metafile = getFlag('--metafile')
+      writeFileSync(metafile, JSON.stringify(result.metafile))
     }
   } catch (e) {
     console.error(e)
