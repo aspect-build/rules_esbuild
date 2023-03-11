@@ -1,1 +1,2 @@
-../../.bazelrc
+build --enable_runfiles
+common:bzlmod --enable_bzlmod
