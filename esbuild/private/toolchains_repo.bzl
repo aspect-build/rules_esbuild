@@ -46,7 +46,7 @@ _PLATFORMS = {
             "@platforms//cpu:aarch64",
         ],
     ),
-    "windows-x64": struct(
+    "win32-x64": struct(
         compatible_with = [
             "@platforms//os:windows",
             "@platforms//cpu:x86_64",
@@ -61,7 +61,7 @@ def get_platforms(version):
     if versions.is_at_least("0.16.0", version):
         return _PLATFORMS
     return {
-        k.replace("-x64", "-64").replace("windows", "win32"): v
+        k.replace("windows", "win32"): v
         for k, v in _PLATFORMS.items()
     }
 
