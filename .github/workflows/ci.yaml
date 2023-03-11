@@ -79,10 +79,6 @@ jobs:
           # Don't test bzlmod with Bazel 5 (not supported)
           - bazelversion: 5.3.2
             bzlmodEnabled: true
-          # Broken due to stardoc usage, see
-          # https://github.com/bazelbuild/stardoc/issues/117#issuecomment-1380744704
-          - folder: .
-            bzlmodEnabled: true
           # Don't test Windows with Bazel 5 to minimize Windows minutes (billed at 2X)
           - bazelversion: 5.3.2
             os: windows-latest
@@ -120,11 +116,11 @@ jobs:
         run: echo "${{ matrix.bazelversion }}" > .bazelversion
 
       - name: Set bzlmod flag
-        # Store the --enable_bzlmod flag that we add to the test command below
+        # Store the bzlmod flag that we add to the test command below
         # only when we're running bzlmod in our test matrix.
         id: set_bzlmod_flag
         if: matrix.bzlmodEnabled
-        run: echo "bzlmod_flag=--enable_bzlmod" >> $GITHUB_OUTPUT
+        run: echo "bzlmod_flag=--config=bzlmod" >> $GITHUB_OUTPUT
 
       - name: bazel test //...
         env:
