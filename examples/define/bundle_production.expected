@@ -1,0 +1,8 @@
+(() => {
+  // examples/define/main.js
+  window.DEBUG = false;
+  console.log("global: ", window);
+  console.log("OUTPUT_DIR: ", "examples/define");
+  console.log("RULE_DIR: ", "examples/define");
+})();
+//# sourceMappingURL=bundle_production.js.map

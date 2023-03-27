@@ -1,0 +1,35 @@
+"Demonstrates how to put a banner on output files, see https://esbuild.github.io/api/#banner"
+
+load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
+
+esbuild(
+    name = "bundle_production",
+    define = {
+        "global": "window",
+        "OUTPUT_DIR": "\"$(@D)\"",
+        "RULE_DIR": "\"$(RULEDIR)\"",
+        "process.env.NODE_ENV": "\"production\"",
+    },
+    entry_point = "main.js",
+)
+
+# Make sed replacements for consistency on different platform
+[
+    genrule(
+        name = "sed_{}".format(basename.replace(".", "_")),
+        srcs = [":{}".format(basename)],
+        outs = ["sed_{}".format(basename)],
+        cmd = "sed -E \"s/(\\.\\.\\/.*)?bazel-out\\/.*examples\\//examples\\//\" $(execpath :{}) > $@".format(basename),
+    )
+    for basename in [
+        "bundle_production.js",
+    ]
+]
+
+write_source_files(
+    name = "assertions",
+    files = {
+        "bundle_production.expected": "sed_bundle_production.js",
+    },
+)
