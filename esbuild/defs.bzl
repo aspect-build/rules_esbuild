@@ -24,15 +24,6 @@ def esbuild(name, output_dir = False, splitting = False, config = None, **kwargs
     deps = kwargs.pop("deps", [])
     entry_points = kwargs.get("entry_points", None)
 
-    if types.is_dict(config):
-        config_file = "_%s_config.mjs" % name
-        write_file(
-            name = "_%s_write_config" % name,
-            out = config_file,
-            content = ["export default", json.encode(config)],
-        )
-        config = config_file
-
     if output_dir == True or entry_points or splitting == True:
         _esbuild(
             name = name,

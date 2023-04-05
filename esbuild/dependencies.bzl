@@ -25,9 +25,3 @@ def rules_esbuild_dependencies():
         strip_prefix = "rules_js-1.23.1",
         url = "https://github.com/aspect-build/rules_js/releases/download/v1.23.1/rules_js-v1.23.1.tar.gz",
     )
-
-    http_archive(
-        name = "rules_nodejs",
-        sha256 = "764a3b3757bb8c3c6a02ba3344731a3d71e558220adcb0cf7e43c9bba2c37ba8",
-        urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.8.2/rules_nodejs-core-5.8.2.tar.gz"],
-    )

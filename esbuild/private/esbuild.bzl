@@ -1,17 +1,12 @@
 "# esbuild rule"
 
 load("@aspect_bazel_lib//lib:expand_make_vars.bzl", "expand_variables")
-load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_file_to_bin_action", "copy_files_to_bin_actions")
+load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_files_to_bin_actions")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("@aspect_rules_js//js:providers.bzl", "JsInfo", "js_info")
-load(":helpers.bzl", "desugar_entry_point_names", "write_args_file")
+load(":helpers.bzl", "desugar_entry_point_names")
 
 _ATTRS = {
-    "args_file": attr.label(
-        allow_single_file = True,
-        mandatory = False,
-        doc = "Internal use only",
-    ),
     "define": attr.string_dict(
         default = {},
         doc = """A dict of global identifier replacements. Values are subject to $(location ...) expansion.
@@ -64,11 +59,6 @@ and cjs when platform is node. If performing code splitting or multiple entry_po
 
 See https://esbuild.github.io/api/#format for more details
 """,
-    ),
-    "launcher": attr.label(
-        executable = True,
-        doc = "Override the default esbuild wrapper, which is supplied by the esbuild toolchain",
-        cfg = "exec",
     ),
     "max_threads": attr.int(
         mandatory = False,
@@ -156,11 +146,10 @@ edge16, node10, esnext). Default es2015.
 See https://esbuild.github.io/api/#target for more details
     """,
     ),
-    "config": attr.label(
+    "config": attr.string_dict(
         mandatory = False,
-        allow_single_file = True,
-        doc = """Configuration file used for esbuild. Note that options set in this file may get overwritten.
-        TODO: show how to write a config file that depends on plugins, similar to the esbuild_config macro in rules_nodejs.
+        doc = """Configuration dict used for esbuild. Note that options set in this dict may get overwritten.
+        TODO: show how to set a config that depends on plugins, similar to the esbuild_config macro in rules_nodejs.
     """,
     ),
 }
@@ -176,59 +165,63 @@ def _bin_relative_path(ctx, file):
     return up + "/" + file.path
 
 def _esbuild_impl(ctx):
-    node_toolinfo = ctx.toolchains["@rules_nodejs//nodejs:toolchain_type"].nodeinfo
     esbuild_toolinfo = ctx.toolchains["@aspect_rules_esbuild//esbuild:toolchain_type"].esbuildinfo
+
+    args = ctx.actions.args()
 
     entry_points = desugar_entry_point_names(ctx.file.entry_point, ctx.files.entry_points)
     entry_points_bin_copy = copy_files_to_bin_actions(ctx, entry_points)
 
-    args = dict({
-        "bundle": True,
-        "define": dict([
-            [
-                k,
-                expand_variables(ctx, ctx.expand_location(v), attribute_name = "define"),
-            ]
-            for k, v in ctx.attr.define.items()
-        ]),
-        # the entry point files to bundle
-        "entryPoints": [_bin_relative_path(ctx, entry_point) for entry_point in entry_points_bin_copy],
-        "external": ctx.attr.external,
-        # by default the log level is "info" and includes an output file summary
-        # under bazel this is slightly redundant and may lead to spammy logs
-        # Also disable the log limit and show all logs
-        "logLevel": "warning",
-        "logLimit": 0,
-        "metafile": ctx.attr.metafile,
-        "platform": ctx.attr.platform,
-        # Don't preserve symlinks since doing so breaks node_modules resolution
-        # in the pnpm-style symlinked node_modules structure.
-        # See https://pnpm.io/symlinked-node-modules-structure.
-        # NB: esbuild will currently leave the sandbox and end up in the output
-        # tree until symlink guards are created to prevent this.
-        # See https://github.com/aspect-build/rules_esbuild/pull/32.
-        "preserveSymlinks": False,
-        "sourcesContent": ctx.attr.sources_content,
-        "target": ctx.attr.target,
-    })
+    # the entry point files to bundle
+    for entry_point in entry_points_bin_copy:
+        args.add(entry_point)
+    
+    args.add("--bundle")
+
+    for k, v in ctx.attr.define.items():
+        args.add("--define:%s=%s" % (k, expand_variables(ctx, ctx.expand_location(v), attribute_name = "define"),))
+
+    for _, e in ctx.attr.external:
+        args.add("--external:%s" % e)
+    
+    # by default the log level is "info" and includes an output file summary
+    # under bazel this is slightly redundant and may lead to spammy logs
+    # Also disable the log limit and show all logs
+    args.add("--log-level=info")
+    args.add("--log-limit=0")
+
+    if ctx.attr.metafile:
+        args.add("--metafile=%s" % ctx.attr.metafile)
+
+    if ctx.attr.platform:
+        args.add("--platform=%s" % ctx.attr.platform)
+
+    # Don't preserve symlinks since doing so breaks node_modules resolution
+    # in the pnpm-style symlinked node_modules structure.
+    # See https://pnpm.io/symlinked-node-modules-structure.
+    # NB: esbuild will currently leave the sandbox and end up in the output
+    # tree until symlink guards are created to prevent this.
+    # See https://github.com/aspect-build/rules_esbuild/pull/32.
+    # args.add("--preserve-symlinks", False)
+
+    args.add("--sources-content=%s" % ("true" if ctx.attr.sources_content else "false"))
+    args.add("--target=%s" % ctx.attr.target)
 
     if ctx.attr.sourcemap:
-        args.update({"sourcemap": ctx.attr.sourcemap})
+        args.add("--sourcemap=%s" % ctx.attr.sourcemap)
 
     if ctx.attr.minify:
-        args.update({"minify": True})
+        args.add("--minify")
     else:
         # by default, esbuild will tree-shake "pure" functions
         # disable this unless also minifying
-        args.update({"ignoreAnnotations": True})
+        args.add("--ignore-annotations")
 
     if ctx.attr.splitting:
         if not ctx.attr.output_dir:
             fail("output_dir must be set to True when splitting is set to True")
-        args.update({
-            "format": "esm",
-            "splitting": True,
-        })
+        args.add("--format=esm")
+        args.add("--splitting")
 
     output_sources = []
 
@@ -237,9 +230,7 @@ def _esbuild_impl(ctx):
         output_sources.append(js_out)
 
         # disable the log limit and show all logs
-        args.update({
-            "outdir": _bin_relative_path(ctx, js_out),
-        })
+        args.add("--outdir=%s" % js_out.path)
     else:
         js_out = ctx.outputs.output
         output_sources.append(js_out)
@@ -254,14 +245,11 @@ def _esbuild_impl(ctx):
             output_sources.append(ctx.outputs.output_css)
 
         if ctx.attr.format:
-            args.update({"format": ctx.attr.format})
+            args.add("--format=%s" % ctx.attr.format)
 
-        args.update({"outfile": _bin_relative_path(ctx, js_out)})
+        args.add("--outfile=%s" % js_out.path)
 
-    env = {
-        "BAZEL_BINDIR": ctx.bin_dir.path,
-        "ESBUILD_BINARY_PATH": "../../../" + esbuild_toolinfo.target_tool_path,
-    }
+    env = {}
 
     if ctx.attr.max_threads > 0:
         env["GOMAXPROCS"] = str(ctx.attr.max_threads)
@@ -270,30 +258,19 @@ def _esbuild_impl(ctx):
     if "no-remote-exec" in ctx.attr.tags:
         execution_requirements = {"no-remote-exec": "1"}
 
-    # setup the args passed to the launcher
-    launcher_args = ctx.actions.args()
     other_inputs = []
-
-    args_file = write_args_file(ctx, args)
-    other_inputs.append(args_file)
-    launcher_args.add("--esbuild_args=%s" % _bin_relative_path(ctx, args_file))
 
     if ctx.attr.metafile:
         # add metafile
         meta_file = ctx.actions.declare_file("%s_metadata.json" % ctx.attr.name)
         output_sources.append(meta_file)
-        launcher_args.add("--metafile=%s" % _bin_relative_path(ctx, meta_file))
+        args.add("--metafile=%s" % meta_file.path)
 
-    # add reference to the users args file, these are merged within the launcher
-    if ctx.attr.args_file:
-        # TODO: Copy this to bin?
-        other_inputs.append(ctx.file.args_file)
-        launcher_args.add("--user_args=%s" % _bin_relative_path(ctx, ctx.file.args_file))
-
-    if ctx.attr.config:
-        config_bin_copy = copy_file_to_bin_action(ctx, ctx.file.config)
-        other_inputs.append(config_bin_copy)
-        launcher_args.add("--config_file=%s" % _bin_relative_path(ctx, config_bin_copy))
+    # TODO:
+    # if ctx.attr.config:
+    #     config_bin_copy = copy_file_to_bin_action(ctx, ctx.file.config)
+    #     other_inputs.append(config_bin_copy)
+    #     launcher_args.add("--config_file=%s" % _bin_relative_path(ctx, config_bin_copy))
 
     # stamp = ctx.attr.node_context_data[NodeContextInfo].stamp
     # if stamp:
@@ -308,7 +285,7 @@ def _esbuild_impl(ctx):
             file
             for file in ctx.files.srcs
             if not (file.path.endswith(".d.ts") or file.path.endswith(".tsbuildinfo"))
-        ]) + entry_points_bin_copy + other_inputs + node_toolinfo.tool_files + esbuild_toolinfo.tool_files,
+        ]) + entry_points_bin_copy + other_inputs + esbuild_toolinfo.tool_files,
         transitive = [js_lib_helpers.gather_files_from_js_providers(
             targets = ctx.attr.srcs + ctx.attr.deps,
             include_transitive_sources = True,
@@ -317,16 +294,17 @@ def _esbuild_impl(ctx):
         )],
     )
 
-    launcher = ctx.executable.launcher or esbuild_toolinfo.launcher.files_to_run
+    print("ARGS: ", args)
+
     ctx.actions.run(
         inputs = input_sources,
         outputs = output_sources,
-        arguments = [launcher_args],
+        arguments = [args],
         progress_message = "%s Javascript %s [esbuild]" % ("Bundling" if not ctx.attr.output_dir else "Splitting", " ".join([_bin_relative_path(ctx, entry_point) for entry_point in entry_points])),
         execution_requirements = execution_requirements,
         mnemonic = "esbuild",
         env = env,
-        executable = launcher,
+        executable = esbuild_toolinfo.esbuild_binary,
     )
 
     npm_linked_packages = js_lib_helpers.gather_npm_linked_packages(
@@ -376,7 +354,6 @@ lib = struct(
     attrs = _ATTRS,
     implementation = _esbuild_impl,
     toolchains = [
-        "@rules_nodejs//nodejs:toolchain_type",
         "@aspect_rules_esbuild//esbuild:toolchain_type",
     ],
 )

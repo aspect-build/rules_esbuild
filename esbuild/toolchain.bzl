@@ -4,8 +4,7 @@
 EsbuildInfo = provider(
     doc = "Information about how to invoke the tool executable.",
     fields = {
-        "launcher": "Bazel-specific wrapper binary that starts up esbuild",
-        "target_tool_path": "Path to the tool executable for the target platform.",
+        "esbuild_binary": "Path to the native 'esbuild' cli for the target platform.",
         "tool_files": """Files required in runfiles to make the tool executable available.
 
 May be empty if the target_tool_path points to a locally installed tool binary.""",
@@ -42,8 +41,7 @@ def _esbuild_toolchain_impl(ctx):
         runfiles = ctx.runfiles(files = tool_files),
     )
     esbuildinfo = EsbuildInfo(
-        launcher = ctx.attr.launcher,
-        target_tool_path = target_tool_path,
+        esbuild_binary = target_tool_path,
         tool_files = tool_files,
     )
 
@@ -63,12 +61,6 @@ def _esbuild_toolchain_impl(ctx):
 esbuild_toolchain = rule(
     implementation = _esbuild_toolchain_impl,
     attrs = {
-        "launcher": attr.label(
-            doc = "Bazel-specific wrapper binary that starts up esbuild",
-            mandatory = True,
-            executable = True,
-            cfg = "exec",
-        ),
         "target_tool": attr.label(
             doc = "A hermetically downloaded executable target for the target platform.",
             mandatory = False,

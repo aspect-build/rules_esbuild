@@ -28,11 +28,3 @@ def desugar_entry_point_names(entry_point, entry_points):
         return [entry_point]
     return entry_points
 
-def write_args_file(ctx, args):
-    args_file = ctx.actions.declare_file("%s.args.json" % ctx.attr.name)
-    ctx.actions.write(
-        output = args_file,
-        content = json.encode(args),
-    )
-
-    return args_file

@@ -5,11 +5,6 @@ exports_files(
     visibility = ["//docs:__pkg__"],
 )
 
-exports_files(
-    ["launcher.js"],
-    visibility = ["//visibility:public"],
-)
-
 bzl_library(
     name = "esbuild",
     srcs = ["esbuild.bzl"],
