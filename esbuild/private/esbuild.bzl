@@ -225,10 +225,16 @@ def _esbuild_impl(ctx):
     if ctx.attr.splitting:
         if not ctx.attr.output_dir:
             fail("output_dir must be set to True when splitting is set to True")
+        if ctx.attr.format and ctx.attr.format != "esm":
+            fail("only format of type 'esm' supported when splitting is set to True")
+
         args.update({
             "format": "esm",
             "splitting": True,
         })
+
+    if ctx.attr.format:
+        args.update({"format": ctx.attr.format})
 
     output_sources = []
 
@@ -252,9 +258,6 @@ def _esbuild_impl(ctx):
 
         if ctx.outputs.output_css:
             output_sources.append(ctx.outputs.output_css)
-
-        if ctx.attr.format:
-            args.update({"format": ctx.attr.format})
 
         args.update({"outfile": _bin_relative_path(ctx, js_out)})
 
