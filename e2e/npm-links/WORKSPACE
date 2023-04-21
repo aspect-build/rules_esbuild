@@ -24,11 +24,11 @@ npm_translate_lock(
 )
 
 # Register a toolchain containing esbuild npm package and native bindings
-load("@aspect_rules_esbuild//esbuild:repositories.bzl", "LATEST_VERSION", "esbuild_register_toolchains")
+load("@aspect_rules_esbuild//esbuild:repositories.bzl", "LATEST_ESBUILD_VERSION", "esbuild_register_toolchains")
 
 esbuild_register_toolchains(
     name = "esbuild",
-    esbuild_version = LATEST_VERSION,
+    esbuild_version = LATEST_ESBUILD_VERSION,
 )
 
 load("@npm//:repositories.bzl", "npm_repositories")
