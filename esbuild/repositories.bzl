@@ -9,7 +9,7 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 load("//esbuild/private:toolchains_repo.bzl", "get_platforms", "toolchains_repo")
 load("//esbuild/private:versions.bzl", "TOOL_VERSIONS")
 
-LATEST_VERSION = TOOL_VERSIONS.keys()[-1]
+LATEST_ESBUILD_VERSION = TOOL_VERSIONS.keys()[-1]
 
 _DOC = "Fetch external tools needed for esbuild toolchain"
 _ATTRS = {
