@@ -1,0 +1,48 @@
+load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@aspect_bazel_lib//lib:testing.bzl", "assert_contains")
+
+SRCS = ["main.js", "libs/a.js", "libs/b.js"]
+ENTRY = "main.js"
+
+esbuild(
+    name = "target-a",
+    srcs = SRCS,
+    entry_point = ENTRY,
+    tsconfig = "tsconfig-a.json",
+    output = "a.js",
+)
+
+esbuild(
+    name = "target-b",
+    srcs = SRCS,
+    entry_point = ENTRY,
+    tsconfig = "tsconfig-b.json",
+    output = "b.js",
+)
+
+esbuild(
+    name = "target-none",
+    # include the tsconfig.json with bad syntax and ensure it is not used
+    srcs = [ENTRY, "tsconfig.json"],
+    entry_point = ENTRY,
+    output = "none.js",
+    external = ["var-lib"],
+)
+
+assert_contains(
+    name = "config-a",
+    actual = "a.js",
+    expected = "library: A"
+)
+
+assert_contains(
+    name = "config-b",
+    actual = "b.js",
+    expected = "library: B"
+)
+
+assert_contains(
+    name = "config-none",
+    actual = "none.js",
+    expected = "var-lib"
+)

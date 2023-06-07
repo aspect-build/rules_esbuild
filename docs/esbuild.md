@@ -9,7 +9,7 @@
 <pre>
 esbuild_bundle(<a href="#esbuild_bundle-name">name</a>, <a href="#esbuild_bundle-args_file">args_file</a>, <a href="#esbuild_bundle-config">config</a>, <a href="#esbuild_bundle-data">data</a>, <a href="#esbuild_bundle-define">define</a>, <a href="#esbuild_bundle-deps">deps</a>, <a href="#esbuild_bundle-entry_point">entry_point</a>, <a href="#esbuild_bundle-entry_points">entry_points</a>, <a href="#esbuild_bundle-external">external</a>,
                <a href="#esbuild_bundle-format">format</a>, <a href="#esbuild_bundle-launcher">launcher</a>, <a href="#esbuild_bundle-max_threads">max_threads</a>, <a href="#esbuild_bundle-metafile">metafile</a>, <a href="#esbuild_bundle-minify">minify</a>, <a href="#esbuild_bundle-output">output</a>, <a href="#esbuild_bundle-output_css">output_css</a>, <a href="#esbuild_bundle-output_dir">output_dir</a>,
-               <a href="#esbuild_bundle-output_map">output_map</a>, <a href="#esbuild_bundle-platform">platform</a>, <a href="#esbuild_bundle-sourcemap">sourcemap</a>, <a href="#esbuild_bundle-sources_content">sources_content</a>, <a href="#esbuild_bundle-splitting">splitting</a>, <a href="#esbuild_bundle-srcs">srcs</a>, <a href="#esbuild_bundle-target">target</a>)
+               <a href="#esbuild_bundle-output_map">output_map</a>, <a href="#esbuild_bundle-platform">platform</a>, <a href="#esbuild_bundle-sourcemap">sourcemap</a>, <a href="#esbuild_bundle-sources_content">sources_content</a>, <a href="#esbuild_bundle-splitting">splitting</a>, <a href="#esbuild_bundle-srcs">srcs</a>, <a href="#esbuild_bundle-target">target</a>, <a href="#esbuild_bundle-tsconfig">tsconfig</a>)
 </pre>
 
 Runs the esbuild bundler under Bazel
@@ -46,6 +46,7 @@ For further information about esbuild, see https://esbuild.github.io/
 | <a id="esbuild_bundle-splitting"></a>splitting |  If true, esbuild produces an output directory containing all the output files from code splitting for multiple entry points<br><br>See https://esbuild.github.io/api/#splitting and https://esbuild.github.io/api/#entry-points for more details   | Boolean | optional | <code>False</code> |
 | <a id="esbuild_bundle-srcs"></a>srcs |  Source files to be made available to esbuild   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="esbuild_bundle-target"></a>target |  Environment target (e.g. es2017, chrome58, firefox57, safari11,  edge16, node10, esnext). Default es2015.<br><br>See https://esbuild.github.io/api/#target for more details   | String | optional | <code>"es2015"</code> |
+| <a id="esbuild_bundle-tsconfig"></a>tsconfig |  TypeScript configuration file used by esbuild. Default to an empty file with no configuration.<br><br>        See https://esbuild.github.io/api/#tsconfig for more details   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
 <a id="lib.implementation"></a>
