@@ -3,16 +3,20 @@ load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
 load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
 load("@aspect_bazel_lib//lib:directory_path.bzl", "directory_path")
 
-FORMATS = ["iife", "cjs", "esm"]
+FORMATS = [
+    "iife",
+    "cjs",
+    "esm",
+]
 
 # Bundle in each format
 [
     esbuild(
         name = "bundle_%s" % format,
-        entry_point = "main.js",
         srcs = ["main.js"],
+        entry_point = "main.js",
         format = format,
-        sourcemap = "external", # to easily diff against other files
+        sourcemap = "external",  # to easily diff against other files
     )
     for format in FORMATS
 ]
@@ -20,17 +24,19 @@ FORMATS = ["iife", "cjs", "esm"]
 # Adding platform = browser should produce the same
 esbuild(
     name = "bundle_points_cjs_browser",
-    entry_points = ["main.js"],
     srcs = ["main.js"],
+    entry_points = ["main.js"],
     format = "cjs",
     platform = "browser",
-    sourcemap = "external", # to easily diff against other files
+    sourcemap = "external",  # to easily diff against other files
 )
+
 directory_path(
     name = "bundle_points_cjs_browser-main.js",
     directory = ":bundle_points_cjs_browser",
     path = "main.js",
 )
+
 diff_test(
     name = "bundle_cjs_browser_test",
     file1 = ":bundle_points_cjs_browser-main.js",
@@ -40,12 +46,13 @@ diff_test(
 # entry_point vs entry_points should produce the same
 esbuild(
     name = "bundle_point_cjs_browser",
-    entry_point = "main.js",
     srcs = ["main.js"],
+    entry_point = "main.js",
     format = "cjs",
     platform = "browser",
-    sourcemap = "external", # to easily diff against other files
+    sourcemap = "external",  # to easily diff against other files
 )
+
 diff_test(
     name = "bundle_cjs_browser-point-vs-points_test",
     file1 = ":bundle_points_cjs_browser-main.js",
@@ -55,18 +62,20 @@ diff_test(
 # output_dir should produce the same
 esbuild(
     name = "bundle_points_cjs_dir",
-    entry_point = "main.js",
-    output_dir = True,
     srcs = ["main.js"],
+    entry_point = "main.js",
     format = "cjs",
+    output_dir = True,
     platform = "browser",
-    sourcemap = "external", # to easily diff against other files
+    sourcemap = "external",  # to easily diff against other files
 )
+
 directory_path(
     name = "bundle_points_cjs_dir-main.js",
     directory = ":bundle_points_cjs_dir",
     path = "main.js",
 )
+
 diff_test(
     name = "bundle_points_cjs_dir_test",
     file1 = ":bundle_points_cjs_dir-main.js",
@@ -94,5 +103,8 @@ TESTS = [
 
 write_source_files(
     name = "assertions",
-    files = dict([["golden/%s" % basename, "sed_%s" % basename] for basename in TESTS])
+    files = dict([[
+        "golden/%s" % basename,
+        "sed_%s" % basename,
+    ] for basename in TESTS]),
 )
