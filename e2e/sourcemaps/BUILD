@@ -1,29 +1,38 @@
 load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 
-SRCS = ["main.js", "lib.js"]
+SRCS = [
+    "main.js",
+    "lib.js",
+]
+
 ENTRY = "main.js"
 
 esbuild(
     name = "sourcemap-default",
+    testonly = 1,
     srcs = SRCS,
     entry_point = ENTRY,
     output = "sm-default.js",
-    testonly = 1,
 )
+
 build_test(
     name = "default",
-    targets = ["sm-default.js", "sm-default.js.map"],
+    targets = [
+        "sm-default.js",
+        "sm-default.js.map",
+    ],
 )
 
 esbuild(
     name = "sourcemap-falsy",
+    testonly = 1,
     srcs = SRCS,
     entry_point = ENTRY,
     output = "sm-falsy.js",
     sourcemap = False,
-    testonly = 1,
 )
+
 build_test(
     name = "falsy",
     targets = ["sm-falsy.js"],
@@ -31,12 +40,13 @@ build_test(
 
 esbuild(
     name = "sourcemap-none",
+    testonly = 1,
     srcs = SRCS,
     entry_point = ENTRY,
     output = "sm-none.js",
     sourcemap = None,
-    testonly = 1,
 )
+
 build_test(
     name = "none",
     targets = ["sm-none.js"],
@@ -44,38 +54,47 @@ build_test(
 
 esbuild(
     name = "sourcemap-linked",
+    testonly = 1,
     srcs = SRCS,
     entry_point = ENTRY,
     output = "sm-linked.js",
     sourcemap = "linked",
-    testonly = 1,
 )
+
 build_test(
     name = "linked",
-    targets = ["sm-linked.js", "sm-linked.js.map"],
+    targets = [
+        "sm-linked.js",
+        "sm-linked.js.map",
+    ],
 )
 
 esbuild(
     name = "sourcemap-external",
+    testonly = 1,
     srcs = SRCS,
     entry_point = ENTRY,
     output = "sm-external.js",
     sourcemap = "external",
-    testonly = 1,
 )
+
 build_test(
     name = "external",
-    targets = ["sm-external.js", "sm-external.js.map"],
+    targets = [
+        "sm-external.js",
+        "sm-external.js.map",
+    ],
 )
 
 esbuild(
     name = "sourcemap-inline",
+    testonly = 1,
     srcs = SRCS,
     entry_point = ENTRY,
     output = "sm-inline.js",
     sourcemap = "inline",
-    testonly = 1,
 )
+
 build_test(
     name = "inline",
     targets = ["sm-inline.js"],
@@ -83,13 +102,17 @@ build_test(
 
 esbuild(
     name = "sourcemap-both",
+    testonly = 1,
     srcs = SRCS,
     entry_point = ENTRY,
     output = "sm-both.js",
     sourcemap = "both",
-    testonly = 1,
 )
+
 build_test(
     name = "both",
-    targets = ["sm-both.js", "sm-both.js.map"],
+    targets = [
+        "sm-both.js",
+        "sm-both.js.map",
+    ],
 )

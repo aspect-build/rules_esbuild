@@ -4,7 +4,6 @@ load("@aspect_bazel_lib//lib:directory_path.bzl", "directory_path")
 load("@aspect_bazel_lib//lib:output_files.bzl", "output_files")
 load("//examples:asserts.bzl", "assert_contains")
 
-
 esbuild(
     name = "bundle",
     entry_point = "index.ts",
@@ -13,8 +12,8 @@ esbuild(
 
 output_files(
     name = "bundle_directory",
-    target = ":bundle",
     paths = ["examples/splitting/bundle"],
+    target = ":bundle",
 )
 
 directory_path(
@@ -27,7 +26,7 @@ directory_path(
 copy_file(
     name = "index",
     src = ":index_directory_path",
-    out = "index.js"
+    out = "index.js",
 )
 
 assert_contains(
