@@ -23,6 +23,7 @@ def esbuild(name, output_dir = False, splitting = False, config = None, **kwargs
     srcs = kwargs.pop("srcs", [])
     deps = kwargs.pop("deps", [])
     entry_points = kwargs.get("entry_points", None)
+    tsconfig = kwargs.pop("tsconfig", Label("@aspect_rules_esbuild//esbuild/private:empty-json"))
 
     if types.is_dict(config):
         config_file = "_%s_config.mjs" % name
@@ -37,6 +38,7 @@ def esbuild(name, output_dir = False, splitting = False, config = None, **kwargs
         _esbuild(
             name = name,
             config = config,
+            tsconfig = tsconfig,
             srcs = srcs,
             splitting = splitting,
             output_dir = True,
@@ -61,6 +63,7 @@ def esbuild(name, output_dir = False, splitting = False, config = None, **kwargs
             name = name,
             srcs = srcs,
             config = config,
+            tsconfig = tsconfig,
             output = output,
             output_map = output_map,
             deps = deps,

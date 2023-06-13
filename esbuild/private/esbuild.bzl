@@ -163,6 +163,14 @@ See https://esbuild.github.io/api/#target for more details
         TODO: show how to write a config file that depends on plugins, similar to the esbuild_config macro in rules_nodejs.
     """,
     ),
+    "tsconfig": attr.label(
+        mandatory = True,
+        allow_single_file = True,
+        doc = """TypeScript configuration file used by esbuild. Default to an empty file with no configuration.
+        
+        See https://esbuild.github.io/api/#tsconfig for more details
+    """
+    )
 }
 
 def _bin_relative_path(ctx, file):
@@ -181,6 +189,7 @@ def _esbuild_impl(ctx):
 
     entry_points = desugar_entry_point_names(ctx.file.entry_point, ctx.files.entry_points)
     entry_points_bin_copy = copy_files_to_bin_actions(ctx, entry_points)
+    tsconfig_bin_copy = copy_file_to_bin_action(ctx, ctx.file.tsconfig)
 
     args = dict({
         "bundle": True,
@@ -199,6 +208,7 @@ def _esbuild_impl(ctx):
         # Also disable the log limit and show all logs
         "logLevel": "warning",
         "logLimit": 0,
+        "tsconfig": _bin_relative_path(ctx, tsconfig_bin_copy),
         "metafile": ctx.attr.metafile,
         "platform": ctx.attr.platform,
         # Don't preserve symlinks since doing so breaks node_modules resolution
@@ -311,7 +321,7 @@ def _esbuild_impl(ctx):
             file
             for file in ctx.files.srcs
             if not (file.path.endswith(".d.ts") or file.path.endswith(".tsbuildinfo"))
-        ]) + entry_points_bin_copy + other_inputs + node_toolinfo.tool_files + esbuild_toolinfo.tool_files,
+        ]) + entry_points_bin_copy + [tsconfig_bin_copy] + other_inputs + node_toolinfo.tool_files + esbuild_toolinfo.tool_files,
         transitive = [js_lib_helpers.gather_files_from_js_providers(
             targets = ctx.attr.srcs + ctx.attr.deps,
             include_transitive_sources = True,
