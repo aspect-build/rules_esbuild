@@ -169,8 +169,8 @@ See https://esbuild.github.io/api/#target for more details
         doc = """TypeScript configuration file used by esbuild. Default to an empty file with no configuration.
         
         See https://esbuild.github.io/api/#tsconfig for more details
-    """
-    )
+    """,
+    ),
 }
 
 def _bin_relative_path(ctx, file):
