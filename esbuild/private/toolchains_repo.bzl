@@ -58,12 +58,13 @@ def get_platforms(version):
     # The map above uses the "modern" artifact names
     if versions.is_at_least("0.16.0", version):
         return _PLATFORMS
+
     # v0.16.0 renamed the artifacts.
     # See release notes: https://github.com/evanw/esbuild/releases/tag/v0.16.0
     # We have to transform the artifact names back to what they used to be.
     return {
         # reverse esbuild-windows-64 => @esbuild/win32-x64
-        k.replace("win32", "windows").replace("-x64", "-64") : v
+        k.replace("win32", "windows").replace("-x64", "-64"): v
         for k, v in _PLATFORMS.items()
     }
 
