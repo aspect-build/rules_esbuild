@@ -8,6 +8,12 @@ TAG=${GITHUB_REF_NAME}
 # The prefix is chosen to match what GitHub generates for source archives
 PREFIX="rules_esbuild-${TAG:1}"
 ARCHIVE="rules_esbuild-$TAG.tar.gz"
+
+# Stamp the version into the archive
+echo >>.git/info/attributes <<EOF
+esbuild/private/versions.bzl  export-subst
+EOF
+
 git archive --format=tar --prefix=${PREFIX}/ ${TAG} | gzip > $ARCHIVE
 SHA=$(shasum -a 256 $ARCHIVE | awk '{print $1}')
 
