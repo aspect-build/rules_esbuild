@@ -10,7 +10,7 @@ PREFIX="rules_esbuild-${TAG:1}"
 ARCHIVE="rules_esbuild-$TAG.tar.gz"
 
 # Stamp the version into the archive
-echo >>.git/info/attributes <<EOF
+cat >>.git/info/attributes <<EOF
 esbuild/private/versions.bzl  export-subst
 EOF
 

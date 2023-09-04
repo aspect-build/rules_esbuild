@@ -1,6 +1,6 @@
 """Info for the esbuild packages used"""
 
-RULES_ESBUILD_VERSION = "$Format:%(describe)$"  # Replaced during publishing, see .github/workflows/release_prep.sh
+RULES_ESBUILD_VERSION = "$Format:%(describe:tags=true)$"  # Replaced during publishing, see .github/workflows/release_prep.sh
 
 # Use /scripts/mirror_release.sh to add a newer version below.
 # Versions should be ascending order so TOOL_VERSIONS.keys()[-1] is the latest version.
