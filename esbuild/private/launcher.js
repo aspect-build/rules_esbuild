@@ -2,6 +2,7 @@ const { readFileSync, writeFileSync } = require('fs')
 const { pathToFileURL } = require('url')
 const { join } = require('path')
 const esbuild = require('esbuild')
+const { sandboxPlugin } = require('./plugins/sandbox.js')
 
 function getFlag(flag, required = true) {
   const argvFlag = process.argv.find((arg) => arg.startsWith(`${flag}=`))
@@ -116,6 +117,15 @@ async function runOneBuild(args, userArgsFilePath, configFilePath) {
       ...config,
     }
   }
+
+  const plugins = [
+    // onResolve plugin, must be first to occur.
+    sandboxPlugin()
+  ]
+  if (args.plugins !== undefined) {
+    plugins.push(...args.plugins)
+  }
+  args.plugins = plugins
 
   try {
     const result = await esbuild.build(args)

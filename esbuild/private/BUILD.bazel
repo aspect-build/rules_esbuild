@@ -7,7 +7,7 @@ exports_files(
 )
 
 exports_files(
-    ["launcher.js"],
+    ["launcher.js", "plugins/sandbox.js"],
     visibility = ["//visibility:public"],
 )
 
