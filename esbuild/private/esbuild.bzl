@@ -156,6 +156,10 @@ edge16, node10, esnext). Default es2015.
 See https://esbuild.github.io/api/#target for more details
     """,
     ),
+    "bundle": attr.bool(
+        default = True,
+        doc = """If true, esbuild will bundle the input files, inlining their dependencies recursively""",
+    ),
     "config": attr.label(
         mandatory = False,
         allow_single_file = True,
@@ -192,7 +196,7 @@ def _esbuild_impl(ctx):
     tsconfig_bin_copy = copy_file_to_bin_action(ctx, ctx.file.tsconfig)
 
     args = dict({
-        "bundle": True,
+        "bundle": ctx.attr.bundle,
         "define": dict([
             [
                 k,
@@ -342,26 +346,58 @@ def _esbuild_impl(ctx):
         executable = launcher,
     )
 
-    npm_linked_packages = js_lib_helpers.gather_npm_linked_packages(
-        srcs = ctx.attr.srcs,
-        deps = [],
-    )
-
-    npm_package_store_deps = js_lib_helpers.gather_npm_package_store_deps(
-        # Since we're bundling, only propagate `data` npm packages to the direct dependencies of
-        # downstream linked `npm_package` targets instead of the common `data` and `deps` pattern.
-        targets = ctx.attr.data,
-    )
-
     output_sources_depset = depset(output_sources)
 
-    runfiles = js_lib_helpers.gather_runfiles(
-        ctx = ctx,
-        sources = output_sources_depset,
-        data = ctx.attr.data,
-        # Since we're bundling, we don't propogate any transitive runfiles from dependencies
-        deps = [],
-    )
+    if ctx.attr.bundle:
+        # If we're bundling we don't propogate any transitive sources or declarations since sources
+        # are typically bundled into the output. If a subset of linked npm dependencies are not
+        # bundled it is up the the user to re-specify these in `data` if they are runtime
+        # dependencies to progagate to binary rules or `srcs` if they are to be propagated to
+        # downstream build targets.
+        transitive_sources = output_sources_depset
+        transitive_declarations = depset()
+        npm_linked_packages = js_lib_helpers.gather_npm_linked_packages(
+            srcs = ctx.attr.srcs,
+            deps = [],
+        )
+        npm_linked_packages = struct(
+            direct_files = npm_linked_packages.direct_files,
+            direct = npm_linked_packages.direct,
+            transitive_files = npm_linked_packages.direct_files,
+            transitive = npm_linked_packages.direct,
+        )
+        npm_package_store_deps = js_lib_helpers.gather_npm_package_store_deps(
+            targets = ctx.attr.data,
+        )
+        runfiles = js_lib_helpers.gather_runfiles(
+            ctx = ctx,
+            sources = output_sources_depset,
+            data = ctx.attr.data,
+            deps = [],
+        )
+    else:
+        # If we're not bundling then include all transitive files
+        transitive_sources = js_lib_helpers.gather_transitive_sources(
+            sources = output_sources_depset,
+            targets = ctx.attr.srcs + ctx.attr.deps,
+        )
+        transitive_declarations = js_lib_helpers.gather_transitive_declarations(
+            declarations = [],
+            targets = ctx.attr.srcs + ctx.attr.deps,
+        )
+        npm_linked_packages = js_lib_helpers.gather_npm_linked_packages(
+            srcs = ctx.attr.srcs,
+            deps = ctx.attr.deps,
+        )
+        npm_package_store_deps = js_lib_helpers.gather_npm_package_store_deps(
+            targets = ctx.attr.data + ctx.attr.deps,
+        )
+        runfiles = js_lib_helpers.gather_runfiles(
+            ctx = ctx,
+            sources = transitive_sources,
+            data = ctx.attr.data,
+            deps = ctx.attr.srcs + ctx.attr.deps,
+        )
 
     return [
         DefaultInfo(
@@ -373,15 +409,10 @@ def _esbuild_impl(ctx):
             npm_linked_packages = npm_linked_packages.direct,
             npm_package_store_deps = npm_package_store_deps,
             sources = output_sources_depset,
-            # Since we're bundling, we don't propogate linked npm packages from dependencies since
-            # they are bundled and the dependencies are dropped. If a subset of linked npm
-            # dependencies are not bundled it is up the the user to re-specify these in `data` if
-            # they are runtime dependencies to progagate to binary rules or `srcs` if they are to be
-            # propagated to downstream build targets.
-            transitive_npm_linked_package_files = npm_linked_packages.direct_files,
-            transitive_npm_linked_packages = npm_linked_packages.direct,
-            # Since we're bundling, we don't propogate any transitive sources from dependencies
-            transitive_sources = output_sources_depset,
+            transitive_npm_linked_package_files = npm_linked_packages.transitive_files,
+            transitive_npm_linked_packages = npm_linked_packages.transitive,
+            transitive_sources = transitive_sources,
+            transitive_declarations = transitive_declarations,
         ),
     ]
 
