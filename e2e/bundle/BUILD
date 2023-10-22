@@ -1,30 +1,38 @@
+load("@aspect_bazel_lib//lib:testing.bzl", "assert_contains")
 load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
-load("@bazel_skylib//rules:build_test.bzl", "build_test")
 
-SRCS = ["main.js", "lib.js"]
+SRCS = [
+    "main.js",
+    "lib.js",
+]
+
 ENTRY = "main.js"
 
 esbuild(
     name = "bundle-true",
+    testonly = 1,
     srcs = SRCS,
     entry_point = ENTRY,
-    output = "sm-default.js",
-    testonly = 1,
+    output = "bundle-true.js",
 )
-build_test(
-    name = "true",
-    targets = [":bundle-true"],
+
+assert_contains(
+    name = "bundle-true_test",
+    actual = ":bundle-true.js",
+    expected = "ANSWER = 42",
 )
 
 esbuild(
     name = "bundle-false",
-    srcs = SRCS,
-    entry_point = ENTRY,
-    bundle = False,
-    output_dir = ".",
     testonly = 1,
+    srcs = SRCS,
+    bundle = False,
+    entry_point = ENTRY,
+    output = "bundle-false.js",
 )
-build_test(
-    name = "false",
-    targets = [":bundle-false"],
+
+assert_contains(
+    name = "bundle-false_test",
+    actual = ":bundle-false.js",
+    expected = "from \"./lib\"",
 )

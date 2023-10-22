@@ -4,8 +4,6 @@ local_repository(
     path = "../..",
 )
 
-#---SNIP--- Below here is re-used in the workspace snippet published on releases
-
 ######################
 # rules_esbuild setup #
 ######################

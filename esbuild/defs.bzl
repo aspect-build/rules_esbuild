@@ -34,7 +34,12 @@ def esbuild(name, output_dir = False, splitting = False, config = None, **kwargs
         )
         config = config_file
 
-    if output_dir == True or entry_points or splitting == True:
+    if type(output_dir) != "bool":
+        fail("output_dir expected to be a bool")
+    if type(splitting) != "bool":
+        fail("splitting expected to be a bool")
+
+    if output_dir or entry_points or splitting:
         _esbuild(
             name = name,
             config = config,
