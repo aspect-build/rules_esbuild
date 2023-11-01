@@ -9,11 +9,7 @@ TAG=${GITHUB_REF_NAME}
 PREFIX="rules_esbuild-${TAG:1}"
 ARCHIVE="rules_esbuild-$TAG.tar.gz"
 
-# Stamp the version into the archive
-cat >>.git/info/attributes <<EOF
-esbuild/private/versions.bzl  export-subst
-EOF
-
+# NB: configuration for 'git archive' is in /.gitattributes
 git archive --format=tar --prefix=${PREFIX}/ ${TAG} | gzip > $ARCHIVE
 SHA=$(shasum -a 256 $ARCHIVE | awk '{print $1}')
 
