@@ -11,6 +11,10 @@ load("//esbuild/private:versions.bzl", "TOOL_VERSIONS")
 
 LATEST_ESBUILD_VERSION = TOOL_VERSIONS.keys()[-1]
 
+# Default base name for esbuild toolchain repositories
+# created by the module extension
+DEFAULT_ESBUILD_REPOSITORY = "esbuild"
+
 _DOC = "Fetch external tools needed for esbuild toolchain"
 _ATTRS = {
     "esbuild_version": attr.string(mandatory = True, values = TOOL_VERSIONS.keys()),
