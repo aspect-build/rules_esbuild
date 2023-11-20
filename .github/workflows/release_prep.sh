@@ -37,3 +37,11 @@ http_archive(
 EOF
 awk 'f;/--SNIP--/{f=1}' e2e/smoke/WORKSPACE.bazel
 echo "\`\`\`"
+
+cat << EOF
+To use rules_esbuild with bazel-lib 2.0, you must additionally register the coreutils toolchain.
+\`\`\`starlark
+load("@aspect_bazel_lib//lib:repositories.bzl", "register_coreutils_toolchains")
+register_coreutils_toolchains()
+\`\`\`
+EOF
