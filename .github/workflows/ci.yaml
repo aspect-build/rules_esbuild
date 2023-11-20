@@ -84,6 +84,9 @@ jobs:
           # Don't test Windows with Bazel 5 to minimize Windows minutes (billed at 2X)
           - bazelversion: 5.3.2
             os: windows-latest
+          # Don't run the root workspace with Bazel 5, it uses bazel-lib 2.0 which doesn't work.
+          - bazelversion: 5.3.2
+            folder: '.'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
