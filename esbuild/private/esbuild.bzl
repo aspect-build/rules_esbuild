@@ -433,5 +433,9 @@ esbuild_bundle = rule(
 Runs the esbuild bundler under Bazel
 
 For further information about esbuild, see https://esbuild.github.io/
+
+Note: esbuild currently follows symlinks and leaves the bazel sandbox, see https://github.com/aspect-build/rules_esbuild/issues/58 for potential issues and workarounds.
+
+For example, escaping the sandbox may require extra configuration such as overriding the default `resolveExtensions` to not load .ts[x] files that are pre-compiled by other rules.
 """,
 )
