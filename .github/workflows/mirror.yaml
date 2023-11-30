@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          ./scripts/mirror_releases.sh
+          ./scripts/mirror_release.sh
           npx @bazel/buildifier esbuild/private/versions.bzl
           bazel run docs:update
       - name: Create Pull Request
