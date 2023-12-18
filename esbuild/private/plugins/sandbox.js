@@ -42,16 +42,20 @@ export function sandboxPlugin() {
 async function resolveInSandbox(build, importPath, otherOptions) {
   const result = await build.resolve(importPath, otherOptions)
 
+  if (result.errors && result.errors.length) {
+    // There was an error resolving, just return the error as-is.
+    return result
+  }
+
   // If esbuild attempts to leave the sandbox, map the path back into the sandbox.
   if (!result.path.startsWith(sandboxRoot)) {
-    const pathPieces = result.path.split(bindir)
-    if (pathPieces.length != 2) {
+    if (!result.path.startsWith(bindir)) {
       // If it tried to leave bazel-bin, error out completely.
       throw new Error(
         `Error: esbuild resolved a path outside of BAZEL_BINDIR: ${result.path}`,
       )
     }
-    result.path = path.join(sandboxRoot, pathPieces[1])
+    result.path = path.join(sandboxRoot, result.slice(bindir.length))
   }
   return result
 }
