@@ -59,4 +59,4 @@ async function resolveInSandbox(build, importPath, otherOptions) {
   return result
 }
 
-module.exports = { sandboxPlugin };
+module.exports = { sandboxPlugin }
