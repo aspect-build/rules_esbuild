@@ -26,9 +26,9 @@ Note that the examples rely on code in the `/WORKSPACE` file in the root of this
 
 ## From a BUILD file
 
-The simplest usage is with the [`esbuild` macro](./docs/rules).
+The simplest usage is with the [`esbuild` macro](./docs/rules.md#esbuild).
 
-If needed, instead of the macro you could call the underlying [`esbuild_bundle` rule](./docs/esbuild) directly.
+If needed, instead of the macro you could call the underlying [`esbuild_bundle` rule](./docs/esbuild.md#esbuild_bundle) directly.
 
 # In a macro
 
