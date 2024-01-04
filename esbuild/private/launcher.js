@@ -2,6 +2,7 @@ const { readFileSync, writeFileSync } = require('fs')
 const { pathToFileURL } = require('url')
 const { join } = require('path')
 const esbuild = require('esbuild')
+const { bazelSandboxPlugin } = require('./plugins/bazel-sandbox.js')
 
 function getFlag(flag, required = true) {
   const argvFlag = process.argv.find((arg) => arg.startsWith(`${flag}=`))
@@ -68,7 +69,7 @@ async function processConfigFile(configFilePath, existingArgs = {}) {
 
     if (IGNORED_CONFIG_KEYS.includes(key)) {
       console.error(
-        `[WARNING] esbuild configuration property '${key}' from '${configFilePath}' will be ignored and overriden`
+        `[WARNING] esbuild configuration property '${key}' from '${configFilePath}' will be ignored and overridden`
       )
     } else if (
       MERGE_CONFIG_KEYS.includes(key) &&
@@ -116,6 +117,16 @@ async function runOneBuild(args, userArgsFilePath, configFilePath) {
       ...config,
     }
   }
+
+  const plugins = []
+  if (!!process.env.ESBUILD_BAZEL_SANDBOX_PLUGIN) {
+    // onResolve plugin, must be first to occur.
+    plugins.push(bazelSandboxPlugin())
+  }
+  if (args.plugins !== undefined) {
+    plugins.push(...args.plugins)
+  }
+  args.plugins = plugins
 
   try {
     const result = await esbuild.build(args)

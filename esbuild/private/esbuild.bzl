@@ -2,7 +2,7 @@
 
 load("@aspect_bazel_lib//lib:expand_make_vars.bzl", "expand_variables")
 load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_file_to_bin_action", "copy_files_to_bin_actions")
-load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
+load("@aspect_rules_js//js:libs.bzl", "js_lib_constants", "js_lib_helpers")
 load("@aspect_rules_js//js:providers.bzl", "JsInfo", "js_info")
 load(":helpers.bzl", "desugar_entry_point_names", "write_args_file")
 
@@ -175,6 +175,30 @@ See https://esbuild.github.io/api/#target for more details
         See https://esbuild.github.io/api/#tsconfig for more details
     """,
     ),
+    "bazel_sandbox_plugin": attr.bool(
+        default = True,
+        doc = """If true, a custom bazel-sandbox plugin will be enabled that prevents esbuild from leaving the Bazel sandbox.
+        See https://github.com/aspect-build/rules_esbuild/pull/160 for more info.""",
+    ),
+    "esbuild_log_level": attr.string(
+        default = "warning",
+        doc = """Set the logging level of esbuild.
+
+        We set a default of "warmning" since the esbuild default of "info" includes
+        an output file summary which is slightly redundant under Bazel and may lead
+        to spammy `bazel build` output.
+
+        See https://esbuild.github.io/api/#log-level for more details.
+        """,
+        values = ["silent", "error", "warning", "info", "debug", "verbose"],
+    ),
+    "js_log_level": attr.string(
+        default = "error",
+        doc = """Set the logging level for js_binary launcher and the JavaScript bazel-sandbox plugin.
+
+        Log levels: {}""".format(", ".join(js_lib_constants.LOG_LEVELS.keys())),
+        values = js_lib_constants.LOG_LEVELS.keys(),
+    ),
 }
 
 def _bin_relative_path(ctx, file):
@@ -204,13 +228,10 @@ def _esbuild_impl(ctx):
             ]
             for k, v in ctx.attr.define.items()
         ]),
-        # the entry point files to bundle
         "entryPoints": [_bin_relative_path(ctx, entry_point) for entry_point in entry_points_bin_copy],
         "external": ctx.attr.external,
-        # by default the log level is "info" and includes an output file summary
-        # under bazel this is slightly redundant and may lead to spammy logs
-        # Also disable the log limit and show all logs
-        "logLevel": "warning",
+        "logLevel": ctx.attr.esbuild_log_level,
+        # Disable the log limit and show all logs
         "logLimit": 0,
         "tsconfig": _bin_relative_path(ctx, tsconfig_bin_copy),
         "metafile": ctx.attr.metafile,
@@ -218,9 +239,6 @@ def _esbuild_impl(ctx):
         # Don't preserve symlinks since doing so breaks node_modules resolution
         # in the pnpm-style symlinked node_modules structure.
         # See https://pnpm.io/symlinked-node-modules-structure.
-        # NB: esbuild will currently leave the sandbox and end up in the output
-        # tree until symlink guards are created to prevent this.
-        # See https://github.com/aspect-build/rules_esbuild/pull/32.
         "preserveSymlinks": False,
         "sourcesContent": ctx.attr.sources_content,
         "target": ctx.attr.target,
@@ -280,8 +298,14 @@ def _esbuild_impl(ctx):
         "ESBUILD_BINARY_PATH": "../../../" + esbuild_toolinfo.target_tool_path,
     }
 
+    if ctx.attr.bazel_sandbox_plugin:
+        env["ESBUILD_BAZEL_SANDBOX_PLUGIN"] = "1"
+
     if ctx.attr.max_threads > 0:
         env["GOMAXPROCS"] = str(ctx.attr.max_threads)
+
+    for log_level_env in js_lib_helpers.envs_for_log_level(ctx.attr.js_log_level):
+        env[log_level_env] = "1"
 
     execution_requirements = {}
     if "no-remote-exec" in ctx.attr.tags:

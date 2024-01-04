@@ -7,7 +7,10 @@ esbuild(
         "main.js",
         "name.js",
     ],
+    bazel_sandbox_plugin = True,
     entry_point = "main.js",
+    esbuild_log_level = "verbose",
+    js_log_level = "debug",
     metafile = True,
 )
 
