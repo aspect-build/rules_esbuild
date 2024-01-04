@@ -53,6 +53,15 @@ async function resolveInExecroot(build, importPath, otherOptions) {
     return result
   }
 
+  if (
+    !result.path.startsWith('.') &&
+    !result.path.startsWith('/') &&
+    !result.path.startsWith('\\')
+  ) {
+    // Not a relative or absolute path. Likely a module resolution that is marked "external"
+    return result
+  }
+
   // If esbuild attempts to leave the execroot, map the path back into the execroot.
   if (!result.path.startsWith(execroot)) {
     // If it tried to leave bazel-bin, error out completely.
