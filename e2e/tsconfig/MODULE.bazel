@@ -1,7 +1,7 @@
 "Bazel dependencies"
 
 bazel_dep(name = "aspect_rules_esbuild", version = "0.0.0", dev_dependency = True)
-bazel_dep(name = "aspect_bazel_lib", version = "1.29.2", dev_dependency = True)
+bazel_dep(name = "aspect_bazel_lib", version = "1.39.1", dev_dependency = True)
 
 local_path_override(
     module_name = "aspect_rules_esbuild",
