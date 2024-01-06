@@ -127,6 +127,12 @@ jobs:
         if: matrix.bzlmodEnabled
         run: echo "bzlmod_flag=--config=bzlmod" >> $GITHUB_OUTPUT
 
+      - name: Don't use Aspect CLI on Windows
+        # TODO: re-enable Aspect CLI on Windows once we have Windows releases
+        if: matrix.os == 'windows-latest'
+        working-directory: ${{ matrix.folder }}
+        run: del /f .bazeliskrc
+
       - name: bazel test //...
         env:
           # Bazelisk will download bazel to here, ensure it is cached between runs.
