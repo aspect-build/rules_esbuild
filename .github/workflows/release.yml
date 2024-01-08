@@ -28,6 +28,7 @@ jobs:
       - name: bazel test //...
         run: |
           bazel \
+            --bazelrc=${{ github.workspace }}/.aspect/bazelrc/ci.bazelrc \
             --bazelrc=${{ github.workspace }}/.github/workflows/ci.bazelrc \
             test \
             //...
