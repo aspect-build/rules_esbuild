@@ -4,8 +4,6 @@
 
 # For rules_js
 build --enable_runfiles
-# Config to enable building and testing with bzlmod
-common:bzlmod --enable_bzlmod --@aspect_bazel_lib//lib:flag_bzlmod
 
 # Load any settings specific to the current user.
 # .bazelrc.user should appear in .gitignore so that settings are not shared with team members
