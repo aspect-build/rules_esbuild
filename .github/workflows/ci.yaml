@@ -29,7 +29,7 @@ jobs:
           m=${v::1}
           a=(
             "major:$m, version:\"$v\""
-            "major:5, version:\"5.4.1\""
+            "major:6, version:\"6.4.0\""
           )
           printf -v j '{%s},' "${a[@]}"
           echo "res=[${j%,}]" | tee -a $GITHUB_OUTPUT
@@ -51,7 +51,7 @@ jobs:
       bazel-version: ${{ steps.bazel-version.outputs.res }}
       os: ${{ steps.os.outputs.res }}
 
-  test-matrix:
+  test:
     runs-on: ${{ matrix.os }}-latest
     needs:
       - matrix-prep
@@ -71,20 +71,12 @@ jobs:
         exclude:
           # Don't test MacOS and Windows against secondary bazel version to minimize minutes (billed at 10X and 2X respectively)
           # https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#included-storage-and-minutes
-          - bazel-version:
-              major: 5
-            os: macos
-          - bazel-version:
-              major: 5
-            os: windows
-          # Don't test bzlmod with Bazel 5
-          - bazel-version:
-              major: 5
-            bzlmod: 1
-          # Don't run the root workspace with Bazel 5, it uses bazel-lib 2.0 which doesn't work.
-          - bazel-version:
-              major: 5
-            folder: '.'
+          - os: macos
+            bazel-version:
+              major: 6
+          - os: windows
+            bazel-version:
+              major: 6
 
     steps:
       - uses: actions/checkout@v4
@@ -119,14 +111,11 @@ jobs:
         working-directory: ${{ matrix.folder }}
         shell: bash
         run: |
-          BZLMOD_FLAG=
-          if [[ "${{ matrix.bzlmod }}" == "1" ]]; then
-            BZLMOD_FLAG=--enable_bzlmod
-          fi
           bazel \
             --bazelrc=${GITHUB_WORKSPACE//\\/\/}/.github/workflows/ci.bazelrc \
             test \
-            $BZLMOD_FLAG \
+            --config=bazel${{ matrix.bazel-version.major }} \
+            --enable_bzlmod=${{ matrix.bzlmod }} \
             //...
         env:
           XDG_CACHE_HOME: ~/.cache/xdg-cache # bazelisk will download bazel to here

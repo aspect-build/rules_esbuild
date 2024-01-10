@@ -14,3 +14,7 @@ test --test_output=errors
 
 # Allows tests to run bazelisk-in-bazel, since this is the cache folder used
 test --test_env=XDG_CACHE_HOME
+
+# Bazel version specific settings
+common:bazel6 --test_tag_filters=-skip-on-bazel6
+common:bazel7 --test_tag_filters=-skip-on-bazel7
