@@ -11,6 +11,14 @@ import %workspace%/.aspect/bazelrc/performance.bazelrc
 # still required for rules_esbuild; work to remove this is in https://github.com/aspect-build/rules_esbuild/pull/177
 common --enable_runfiles
 
+# Disable lockfile for now. It is unstable.
+# https://github.com/bazelbuild/bazel/issues/19026
+# https://github.com/bazelbuild/bazel/issues/19621
+# https://github.com/bazelbuild/bazel/issues/19971
+# https://github.com/bazelbuild/bazel/issues/20272
+# https://github.com/bazelbuild/bazel/issues/20369
+common --lockfile_mode=off
+
 # Load any settings specific to the current user.
 # .bazelrc.user should appear in .gitignore so that settings are not shared with team members
 # This needs to be last statement in this
