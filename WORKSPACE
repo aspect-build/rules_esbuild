@@ -81,17 +81,6 @@ load("@stardoc_maven//:defs.bzl", stardoc_pinned_maven_install = "pinned_maven_i
 
 stardoc_pinned_maven_install()
 
-############################################
-# Gazelle, for generating bzl_library targets
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-
-go_rules_dependencies()
-
-go_register_toolchains(version = "1.19.3")
-
-gazelle_dependencies()
-
 # Buildifier
 load("@buildifier_prebuilt//:deps.bzl", "buildifier_prebuilt_deps")
 
