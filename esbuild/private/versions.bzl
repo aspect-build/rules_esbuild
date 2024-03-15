@@ -5,6 +5,14 @@ RULES_ESBUILD_VERSION = "$Format:%(describe:tags=true)$"  # Replaced during publ
 # This assignment is automatically updated by /scripts/mirror_release.sh.
 # Versions should be descending order so TOOL_VERSIONS.keys()[0] is the latest version.
 TOOL_VERSIONS = {
+    "0.20.2": {
+        "npm": "sha512-WdOOppmUNU+IbZ0PaDiTst80zjnrOkyJNHoKupIcVyU8Lvla3Ugx94VzkQ32Ijqd7UhHJy75gNWDMUekcrSJ6g==",
+        "darwin-x64": "sha512-tBcXp9KNphnNH0dfhv8KYkZhjc+H3XBkF5DKtswJblV7KlT9EI2+jeA8DgBjp908WEuYll6pF+UStUCfEpdysA==",
+        "darwin-arm64": "sha512-4J6IRT+10J3aJH3l1yzEg9y3wkTDgDk7TSDFX+wKFiWjqWp/iCfLIYzGyasx9l0SAFPT1HwSCR+0w/h1ES/MjA==",
+        "linux-x64": "sha512-1MdwI6OOTsfQfek8sLwgyjOXAu+wKhLEoaOLTjbijk6E2WONYpH9ZU2mNtR+lZ2B4uwr+usqGuVfFT9tMtGvGw==",
+        "linux-arm64": "sha512-9pb6rBjGvTFNira2FLIWqDk/uaf42sSyLE8j1rnUpuzsODBq7FvpwHYZxQ/It/8b+QOS1RYfqgGFNLRI+qlq2A==",
+        "win32-x64": "sha512-N49X4lJX27+l9jbLKSqZ6bKNjzQvHaT8IIFUy+YIqmXQdjYCToGWwOItDrfby14c78aDd5NHQl29xingXfCdLQ==",
+    },
     "0.20.1": {
         "npm": "sha512-OJwEgrpWm/PCMsLVWXKqvcjme3bHNpOgN7Tb6cQnR5n0TPbQx1/Xrn7rqM+wn17bYeT6MGB5sn1Bh5YiGi70nA==",
         "darwin-x64": "sha512-pFIfj7U2w5sMp52wTY1XVOdoxw+GDwy9FsK3OFz4BpMAjvZVs0dT1VXs8aQm22nhwoIWUmIRaE+4xow8xfIDZA==",
