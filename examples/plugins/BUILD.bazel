@@ -11,4 +11,11 @@ esbuild(
     ],
     config = "esbuild.config.mjs",
     entry_point = "main.js",
+    # using the select statement will download toolchains for all three platforms
+    # you can also just provide an individual toolchain if you don't want to download them all
+    node_toolchain = select({
+        "@bazel_tools//src/conditions:linux_x86_64": "@node18_linux_amd64//:node_toolchain",
+        "@bazel_tools//src/conditions:darwin": "@node18_darwin_amd64//:node_toolchain",
+        "@bazel_tools//src/conditions:windows": "@node18_windows_amd64//:node_toolchain",
+    }),
 )

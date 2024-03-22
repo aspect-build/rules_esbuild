@@ -199,6 +199,16 @@ See https://esbuild.github.io/api/#target for more details
         Log levels: {}""".format(", ".join(js_lib_constants.LOG_LEVELS.keys())),
         values = js_lib_constants.LOG_LEVELS.keys(),
     ),
+    "node_toolchain": attr.label(
+        doc = """The Node.js toolchain to use for this target.
+
+        See https://bazelbuild.github.io/rules_nodejs/Toolchains.html
+
+        Typically this is left unset so that Bazel automatically selects the right Node.js toolchain
+        for the target platform. See https://bazel.build/extending/toolchains#toolchain-resolution
+        for more information.
+        """,
+    ),
 }
 
 def _bin_relative_path(ctx, file):
@@ -212,7 +222,12 @@ def _bin_relative_path(ctx, file):
     return up + "/" + file.path
 
 def _esbuild_impl(ctx):
-    node_toolinfo = ctx.toolchains["@rules_nodejs//nodejs:toolchain_type"].nodeinfo
+    if ctx.attr.node_toolchain:
+        node_toolchain = ctx.attr.node_toolchain[platform_common.ToolchainInfo]
+    else:
+        node_toolchain = ctx.toolchains["@rules_nodejs//nodejs:toolchain_type"]
+
+    node_toolinfo = node_toolchain.nodeinfo
     esbuild_toolinfo = ctx.toolchains["@aspect_rules_esbuild//esbuild:toolchain_type"].esbuildinfo
 
     entry_points = desugar_entry_point_names(ctx.file.entry_point, ctx.files.entry_points)
