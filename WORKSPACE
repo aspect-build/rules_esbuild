@@ -35,6 +35,11 @@ nodejs_register_toolchains(
     node_version = "16.9.0",
 )
 
+nodejs_register_toolchains(
+    name = "node18",
+    node_version = "18.14.2",
+)
+
 load("//esbuild:repositories.bzl", "esbuild_register_toolchains")
 
 esbuild_register_toolchains(
