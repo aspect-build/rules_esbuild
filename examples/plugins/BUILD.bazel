@@ -11,7 +11,7 @@ esbuild(
     ],
     config = "esbuild.config.mjs",
     entry_point = "main.js",
-    # using the select statement will download toolchains for all three platforms
+    # using the select statement will download toolchains for all three platforms in an unconfigured build (e.g. query rather than cquery)
     # you can also just provide an individual toolchain if you don't want to download them all
     node_toolchain = select({
         "@bazel_tools//src/conditions:linux_x86_64": "@node18_linux_amd64//:node_toolchain",
