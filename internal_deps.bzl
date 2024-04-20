@@ -10,14 +10,6 @@ load("//esbuild/private:maybe.bzl", http_archive = "maybe_http_archive")
 def rules_esbuild_internal_deps():
     "Fetch deps needed for local development"
 
-    # opt-in to 2.0 without forcing users to do so
-    http_archive(
-        name = "aspect_bazel_lib",
-        sha256 = "8d71a578e4e1b6a54aea7598ebfbd8fc9e3be5da881ff9d2b80249577b933a40",
-        strip_prefix = "bazel-lib-2.2.0",
-        url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.2.0/bazel-lib-v2.2.0.tar.gz",
-    )
-
     http_archive(
         name = "io_bazel_stardoc",
         sha256 = "62bd2e60216b7a6fec3ac79341aa201e0956477e7c8f6ccc286f279ad1d96432",
