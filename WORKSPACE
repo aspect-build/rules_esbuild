@@ -10,19 +10,9 @@ load("//esbuild:dependencies.bzl", "rules_esbuild_dependencies")
 # Fetch dependencies which users need as well
 rules_esbuild_dependencies()
 
-load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
+load("@aspect_rules_js//js:toolchains.bzl", "DEFAULT_NODE_VERSION", "rules_js_register_toolchains")
 
-rules_js_dependencies()
-
-load("@aspect_bazel_lib//lib:repositories.bzl", "DEFAULT_YQ_VERSION", "aspect_bazel_lib_dependencies", "register_coreutils_toolchains", "register_yq_toolchains")
-
-aspect_bazel_lib_dependencies()
-
-register_coreutils_toolchains()
-
-register_yq_toolchains(
-    version = DEFAULT_YQ_VERSION,
-)
+rules_js_register_toolchains(node_version = DEFAULT_NODE_VERSION)
 
 load("@rules_nodejs//nodejs:repositories.bzl", "nodejs_register_toolchains")
 
@@ -44,7 +34,7 @@ esbuild_register_toolchains(
 )
 
 # Install additional packages to test esbuild plugins
-load("@aspect_rules_js//npm:npm_import.bzl", "npm_translate_lock")
+load("@aspect_rules_js//npm:repositories.bzl", "npm_translate_lock")
 
 npm_translate_lock(
     name = "esbuild_plugins",

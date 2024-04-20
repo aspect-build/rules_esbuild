@@ -4,7 +4,7 @@ These are needed for local dev, and users must install them as well.
 See https://docs.bazel.build/versions/main/skylark/deploying.html#dependencies
 """
 
-load("@aspect_rules_js//npm:npm_import.bzl", "npm_import")
+load("@aspect_rules_js//npm:repositories.bzl", "npm_import")
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("//esbuild/private:toolchains_repo.bzl", "get_platforms", "toolchains_repo")
 load("//esbuild/private:versions.bzl", "TOOL_VERSIONS")
@@ -126,10 +126,8 @@ If you need custom versions, please file an issue.""".format(esbuild_version, TO
 
     npm_import(
         name = "npm__esbuild_" + esbuild_version,
-        run_lifecycle_hooks = False,
+        lifecycle_hooks = [],
         integrity = TOOL_VERSIONS[esbuild_version]["npm"],
         package = "esbuild",
         version = esbuild_version,
-        register_copy_directory_toolchains = register,
-        register_copy_to_directory_toolchains = register,
     )

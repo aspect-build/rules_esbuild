@@ -7,11 +7,11 @@ module(
 )
 
 # Lower-bounds (minimum) versions for direct runtime dependencies
-bazel_dep(name = "aspect_bazel_lib", version = "1.40.0")
-bazel_dep(name = "aspect_rules_js", version = "1.35.0")
+bazel_dep(name = "aspect_bazel_lib", version = "2.7.3")
+bazel_dep(name = "aspect_rules_js", version = "2.0.0-alpha.4")
 bazel_dep(name = "bazel_skylib", version = "1.5.0")
 bazel_dep(name = "platforms", version = "0.0.8")
-bazel_dep(name = "rules_nodejs", version = "5.8.3")
+bazel_dep(name = "rules_nodejs", version = "6.1.0")
 
 esbuild = use_extension("@aspect_rules_esbuild//esbuild:extensions.bzl", "esbuild")
 esbuild.toolchain(
