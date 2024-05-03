@@ -33,16 +33,12 @@ function bazelSandboxPlugin() {
 
       const resolveExtensions = ['', ...(build.initialOptions.resolveExtensions ?? ['.tsx', '.ts', '.jsx', '.js', '.css', '.json'])];
 
-      console.error(build.initialOptions);
-
 
       build.onEnd(() => {
         console.error('Total Time resolving:', totalTime);
         console.error(`Relative ${relativePathTime}/${relativePathCount} = ${relativePathTime / relativePathCount}`);
         console.error(`Other ${otherPathTime}/${otherPathCount} = ${otherPathTime / otherPathCount}`);
-        console.error(`Duplicates: ${duplicates}`)
-        throw new Error('Oh fuck')
-      })
+      });
 
       build.onResolve(
         { filter: /./ },
@@ -237,7 +233,6 @@ async function resolveInExecroot(build, importPath, otherOptions, resolveExtensi
 
     const buildResult = await build.resolve(importPath, otherOptions)
     result = buildResult;
-    console.error(importPath, otherOptions);
 
   }
 
