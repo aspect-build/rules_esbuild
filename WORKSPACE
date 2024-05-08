@@ -1,8 +1,4 @@
-# Declare the local Bazel workspace.
-workspace(
-    # see https://docs.bazel.build/versions/main/skylark/deploying.html#workspace
-    name = "aspect_rules_esbuild",
-)
+workspace(name = "aspect_rules_esbuild")
 
 load(":internal_deps.bzl", "rules_esbuild_internal_deps")
 

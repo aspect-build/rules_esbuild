@@ -1,6 +1,5 @@
 load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 
-#gazelle:exclude internal_deps.bzl
 buildifier(
     name = "buildifier",
     exclude_patterns = ["./.git/*"],
@@ -16,3 +15,5 @@ buildifier(
     mode = "diff",
     tags = ["manual"],  # tag as manual so windows ci does not build it by default
 )
+
+# gazelle:exclude internal_deps.bzl
