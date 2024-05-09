@@ -20,9 +20,9 @@ esbuild.toolchain(
 )
 use_repo(esbuild, "esbuild_toolchains")
 
+register_toolchains("@esbuild_toolchains//:all")
+
 ####### Dev dependencies ########
 
 bazel_dep(name = "buildifier_prebuilt", version = "6.4.0", dev_dependency = True)
 bazel_dep(name = "stardoc", version = "0.6.2", dev_dependency = True, repo_name = "io_bazel_stardoc")
-
-register_toolchains("@esbuild_toolchains//:all")
