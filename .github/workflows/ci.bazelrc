@@ -2,6 +2,11 @@
 common --disk_cache=~/.cache/bazel-disk-cache
 common --repository_cache=~/.cache/bazel-repository-cache
 
-# Bazel version specific settings
-common:bazel6 --test_tag_filters=-skip-on-bazel6
-common:bazel7 --test_tag_filters=-skip-on-bazel7
+# Debug where options came from
+common --announce_rc
+
+# Allows tests to run bazelisk-in-bazel, since this is the cache folder used
+common --test_env=XDG_CACHE_HOME
+
+# Still required for Windows; work to remove this is in https://github.com/aspect-build/rules_esbuild/pull/177
+common --enable_runfiles
