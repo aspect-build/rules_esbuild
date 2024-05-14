@@ -1,9 +1,6 @@
 const path = require('path')
 const process = require('process')
 
-// Regex matching any non-relative import path
-const pkgImport = /^[^.]/
-
 const bindir = process.env.BAZEL_BINDIR
 const execroot = process.env.JS_BINARY__EXECROOT
 
@@ -14,7 +11,6 @@ function bazelSandboxPlugin() {
   return {
     name: 'bazel-sandbox',
     setup(build) {
-      const moduleCache = new Map()
       build.onResolve(
         { filter: /./ },
         async ({ path: importPath, ...otherOptions }) => {
@@ -28,16 +24,6 @@ function bazelSandboxPlugin() {
           }
           otherOptions.pluginData.executedSandboxPlugin = true
 
-          // Prevent us from loading different forms of a module (CJS vs ESM).
-          if (pkgImport.test(importPath)) {
-            if (!moduleCache.has(importPath)) {
-              moduleCache.set(
-                importPath,
-                resolveInExecroot(build, importPath, otherOptions)
-              )
-            }
-            return await moduleCache.get(importPath)
-          }
           return await resolveInExecroot(build, importPath, otherOptions)
         }
       )
