@@ -33,7 +33,14 @@ See https://esbuild.github.io/api/#define for more details
         doc = "A list of direct dependencies that are required to build the bundle",
         providers = [JsInfo],
     ),
-    "data": js_lib_helpers.JS_LIBRARY_DATA_ATTR,
+    "data": attr.label_list(
+        doc = """Runtime dependencies to include in binaries/tests that depend on this target.
+
+Follows the same semantics as `js_library` `data` attribute. See
+https://docs.aspect.build/rulesets/aspect_rules_js/docs/js_library#data for more info.
+""",
+        allow_files = True,
+    ),
     "entry_point": attr.label(
         allow_single_file = True,
         doc = """The bundle's entry point (e.g. your main.js or app.js or index.js)
@@ -365,11 +372,13 @@ def _esbuild_impl(ctx):
             for file in ctx.files.srcs
             if not (file.path.endswith(".d.ts") or file.path.endswith(".tsbuildinfo"))
         ]) + entry_points_bin_copy + [tsconfig_bin_copy] + other_inputs + node_toolinfo.tool_files + esbuild_toolinfo.tool_files,
-        transitive = [js_lib_helpers.gather_files_from_js_providers(
+        transitive = [js_lib_helpers.gather_files_from_js_infos(
             targets = ctx.attr.srcs + ctx.attr.deps,
+            include_sources = True,
+            include_types = False,
             include_transitive_sources = True,
-            include_declarations = False,
-            include_npm_linked_packages = True,
+            include_transitive_types = False,
+            include_npm_sources = True,
         )],
     )
 
@@ -388,31 +397,26 @@ def _esbuild_impl(ctx):
     output_sources_depset = depset(output_sources)
 
     if ctx.attr.bundle:
-        # If we're bundling we don't propogate any transitive sources or declarations since sources
-        # are typically bundled into the output. If a subset of linked npm dependencies are not
-        # bundled it is up the the user to re-specify these in `data` if they are runtime
-        # dependencies to progagate to binary rules or `srcs` if they are to be propagated to
-        # downstream build targets.
+        # When bundling don't propogate any transitive sources or declarations since sources
+        # are typically bundled into the output.
         transitive_sources = output_sources_depset
-        transitive_declarations = depset()
-        npm_linked_packages = js_lib_helpers.gather_npm_linked_packages(
+        transitive_types = depset()
+
+        # If a subset of linked npm dependencies are not bundled, it is up to the user to re-specify
+        # these in `data` if they are runtime dependencies to progagate to binary rules or `srcs` if
+        # they are to be propagated to downstream build targets.
+        npm_sources = js_lib_helpers.gather_npm_sources(
             srcs = ctx.attr.srcs,
             deps = [],
         )
-        npm_linked_packages = struct(
-            direct_files = npm_linked_packages.direct_files,
-            direct = npm_linked_packages.direct,
-            transitive_files = npm_linked_packages.direct_files,
-            transitive = npm_linked_packages.direct,
-        )
-        npm_package_store_deps = js_lib_helpers.gather_npm_package_store_deps(
+        npm_package_store_infos = js_lib_helpers.gather_npm_package_store_infos(
             targets = ctx.attr.data,
         )
         runfiles = js_lib_helpers.gather_runfiles(
             ctx = ctx,
             sources = output_sources_depset,
             data = ctx.attr.data,
-            deps = [],
+            deps = [],  # when bundling, don't propogate any transitive runfiles from dependencies
         )
     else:
         # If we're not bundling then include all transitive files
@@ -420,16 +424,16 @@ def _esbuild_impl(ctx):
             sources = output_sources_depset,
             targets = ctx.attr.srcs + ctx.attr.deps,
         )
-        transitive_declarations = js_lib_helpers.gather_transitive_declarations(
-            declarations = [],
+        transitive_types = js_lib_helpers.gather_transitive_types(
+            types = [],
             targets = ctx.attr.srcs + ctx.attr.deps,
         )
-        npm_linked_packages = js_lib_helpers.gather_npm_linked_packages(
+        npm_sources = js_lib_helpers.gather_npm_sources(
             srcs = ctx.attr.srcs,
             deps = ctx.attr.deps,
         )
-        npm_package_store_deps = js_lib_helpers.gather_npm_package_store_deps(
-            targets = ctx.attr.data + ctx.attr.deps,
+        npm_package_store_infos = js_lib_helpers.gather_npm_package_store_infos(
+            targets = ctx.attr.srcs + ctx.attr.data + ctx.attr.deps,
         )
         runfiles = js_lib_helpers.gather_runfiles(
             ctx = ctx,
@@ -444,14 +448,13 @@ def _esbuild_impl(ctx):
             runfiles = runfiles,
         ),
         js_info(
-            npm_linked_package_files = npm_linked_packages.direct_files,
-            npm_linked_packages = npm_linked_packages.direct,
-            npm_package_store_deps = npm_package_store_deps,
+            target = ctx.label,
             sources = output_sources_depset,
-            transitive_npm_linked_package_files = npm_linked_packages.transitive_files,
-            transitive_npm_linked_packages = npm_linked_packages.transitive,
+            types = depset(),  # esbuild does not emit types directly
             transitive_sources = transitive_sources,
-            transitive_declarations = transitive_declarations,
+            transitive_types = transitive_types,
+            npm_sources = npm_sources,
+            npm_package_store_infos = npm_package_store_infos,
         ),
     ]
 

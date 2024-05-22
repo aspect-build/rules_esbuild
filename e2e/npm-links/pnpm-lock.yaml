@@ -1,13 +1,16 @@
-lockfileVersion: 5.4
+lockfileVersion: '6.0'
 
-specifiers:
-  numeral: ^2.0.6
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
 
 dependencies:
-  numeral: 2.0.6
+  numeral:
+    specifier: ^2.0.6
+    version: 2.0.6
 
 packages:
 
-  /numeral/2.0.6:
+  /numeral@2.0.6:
     resolution: {integrity: sha512-qaKRmtYPZ5qdw4jWJD6bxEf1FJEqllJrwxCLIm0sQU/A7v2/czigzOb+C2uSiFsa9lBUzeH7M1oK+Q+OLxL3kA==}
     dev: false
