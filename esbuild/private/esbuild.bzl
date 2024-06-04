@@ -391,6 +391,7 @@ def _esbuild_impl(ctx):
         execution_requirements = execution_requirements,
         mnemonic = "esbuild",
         env = env,
+        use_default_shell_env = True,
         executable = launcher,
     )
 
