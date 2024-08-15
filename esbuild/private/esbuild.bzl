@@ -421,7 +421,7 @@ def _esbuild_impl(ctx):
     else:
         # If we're not bundling then include all transitive files
         transitive_sources = js_lib_helpers.gather_transitive_sources(
-            sources = output_sources_depset,
+            sources = output_sources,
             targets = ctx.attr.srcs + ctx.attr.deps,
         )
         transitive_types = js_lib_helpers.gather_transitive_types(
