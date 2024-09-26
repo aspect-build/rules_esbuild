@@ -48,8 +48,25 @@ async function resolveInExecroot(build, importPath, otherOptions) {
     return result
   }
 
+  return correctImportPath(result, otherOptions, false)
+}
+
+function correctImportPath(result, otherOptions, firstEntry) {
   // If esbuild attempts to leave the execroot, map the path back into the execroot.
   if (!result.path.startsWith(execroot)) {
+    // A relative path that is marked as external. If it was not marked as external, it would error in the build.resolve call.
+    // We need to make it an absolute path from its importer and then re-attempt correcting it to be within the execroot.
+    if (result.path.startsWith("..")) {
+      const absPath = path.resolve(otherOptions.importer, result.path)
+      if (!!process.env.JS_BINARY__LOG_DEBUG) {
+        console.error(
+          `DEBUG: [bazel-sandbox] relative & external path found ${result.path}, making absolute relative to its importer ${otherOptions.importer} and then reattempting making it relative to the execroot (${execroot}): ${absPath}`
+        )
+      }
+      result.path = absPath
+      return correctImportPath(result, otherOptions, true)
+    }
+
     // If it tried to leave bazel-bin, error out completely.
     if (!result.path.includes(bindir)) {
       throw new Error(
