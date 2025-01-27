@@ -10,7 +10,7 @@ Features:
   This means that the toolchain is fully self-contained and hermetic, and doesn't require you to
   put esbuild in your package.json. These rules never run `npm install`.
 
-_Need help?_ This ruleset has support provided by https://aspect.dev.
+_Need help?_ This ruleset has support provided by https://aspect.build/services.
 
 ## Installation
 
