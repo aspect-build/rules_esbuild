@@ -1,0 +1,37 @@
+load("@aspect_bazel_lib//lib:diff_test.bzl", "diff_test")
+load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+
+esbuild(
+    name = "default",
+    entry_point = "index.js",
+    sourcemap = False,
+)
+
+esbuild(
+    name = "es2015",
+    entry_point = "index.js",
+    sourcemap = False,
+    target = "es2015",
+)
+
+esbuild(
+    name = "es2015-array",
+    entry_point = "index.js",
+    sourcemap = False,
+    target = [
+        "es2015",
+        "firefox67",
+    ],
+)
+
+diff_test(
+    name = "es2015-vs-default",
+    file1 = ":default.js",
+    file2 = ":es2015.js",
+)
+
+diff_test(
+    name = "es2015-vs-es2015-array",
+    file1 = ":es2015.js",
+    file2 = ":es2015-array.js",
+)

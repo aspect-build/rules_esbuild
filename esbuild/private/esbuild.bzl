@@ -155,8 +155,8 @@ See https://esbuild.github.io/api/#splitting and https://esbuild.github.io/api/#
         default = [],
         doc = """Source files to be made available to esbuild""",
     ),
-    "target": attr.string(
-        default = "es2015",
+    "target": attr.string_list(
+        default = ["es2015"],
         doc = """Environment target (e.g. es2017, chrome58, firefox57, safari11, 
 edge16, node10, esnext). Default es2015.
 
