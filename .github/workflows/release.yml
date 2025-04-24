@@ -7,43 +7,21 @@ on:
   push:
     tags:
       - 'v*.*.*'
-
+permissions:
+  id-token: write
+  attestations: write
+  contents: write
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Mount bazel caches
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/bazel-disk-cache
-            ~/.cache/bazel-repository-cache
-            ~/.cache/xdg-cache
-          key: bazel-cache-release-${{ hashFiles('.bazelrc', '.bazelversion', '.bazeliskrc', '**/BUILD', '**/BUILD.bazel', '**/*.bzl', 'WORKSPACE', 'WORKSPACE.bazel', 'WORKSPACE.bzlmod', 'MODULE.bazel') }}
-          restore-keys: bazel-cache-release-
-
-      - name: bazel test //...
-        run: |
-          bazel \
-            --bazelrc=${{ github.workspace }}/.aspect/bazelrc/ci.bazelrc \
-            --bazelrc=${{ github.workspace }}/.github/workflows/ci.bazelrc \
-            test \
-            //...
-        env:
-          XDG_CACHE_HOME: ~/.cache/xdg-cache # bazelisk will download bazel to here
-
-      - name: Prepare release
-        run: .github/workflows/release_prep.sh ${{ env.GITHUB_REF_NAME }} > release_notes.txt
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          prerelease: true
-          # Use GH feature to populate the changelog automatically
-          generate_release_notes: true
-          body_path: release_notes.txt
-          fail_on_unmatched_files: true
-          files: rules_esbuild-*.tar.gz
+  release:
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.2.2
+    with:
+      release_files: rules_esbuild-*.tar.gz
+      prerelease: false
+      tag_name: ${{ github.ref_name }}
+  publish:
+    needs: release
+    uses: ./.github/workflows/publish.yaml
+    with:
+      tag_name: ${{ github.ref_name }}
+    secrets:
+      publish_token: ${{ secrets.BCR_PUBLISH_TOKEN }}
