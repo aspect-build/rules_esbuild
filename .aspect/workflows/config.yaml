@@ -1,4 +1,16 @@
 # See https://docs.aspect.build/workflows/configuration
+workspaces:
+    .:
+        icon: esbuild
+        label: rules_esbuild
+    e2e/smoke:
+        icon: bazel
+        tasks:
+            - format:
+                  without: true
+            - buildifier:
+                  without: true
+
 tasks:
     - checkout:
           update_strategy: rebase
