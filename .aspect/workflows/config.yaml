@@ -1,0 +1,11 @@
+# See https://docs.aspect.build/workflows/configuration
+tasks:
+    - checkout:
+          update_strategy: rebase
+    - buildifier:
+          queue: aspect-medium
+    - test:
+    - finalization:
+          queue: aspect-small
+notifications:
+    github: {}
