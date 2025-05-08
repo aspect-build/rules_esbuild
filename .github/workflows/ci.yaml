@@ -23,17 +23,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - id: bazel-version
-        name: Prepare 'bazel-version' matrix axis
-        run: |
-          v=$(head -n 1 .bazelversion)
-          m=${v::1}
-          a=(
-            "major:$m, version:\"$v\""
-            "major:6, version:\"6.5.0\""
-          )
-          printf -v j '{%s},' "${a[@]}"
-          echo "res=[${j%,}]" | tee -a $GITHUB_OUTPUT
       - id: os
         name: Prepare 'os' matrix axis
         # Only run MacOS and Windows on main branch (not PRs) to minimize minutes (billed at 10X and 2X respectively)
@@ -49,7 +38,6 @@ jobs:
           printf -v j '"%s",' "${a[@]}"
           echo "res=[${j%,}]" | tee -a $GITHUB_OUTPUT
     outputs:
-      bazel-version: ${{ steps.bazel-version.outputs.res }}
       os: ${{ steps.os.outputs.res }}
 
   test:
@@ -59,7 +47,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bazel-version: ${{ fromJSON(needs.matrix-prep.outputs.bazel-version) }}
         bzlmod: [1, 0]
         os: ${{ fromJSON(needs.matrix-prep.outputs.os) }}
         folder:
@@ -69,15 +56,6 @@ jobs:
           - 'e2e/sourcemaps'
           - 'e2e/tsconfig'
           - 'e2e/bundle'
-        exclude:
-          # Don't test MacOS and Windows against secondary bazel version to minimize minutes (billed at 10X and 2X respectively)
-          # https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#included-storage-and-minutes
-          - os: macos
-            bazel-version:
-              major: 6
-          - os: windows
-            bazel-version:
-              major: 6
 
     steps:
       - uses: actions/checkout@v4
@@ -89,17 +67,13 @@ jobs:
             ~/.cache/bazel-disk-cache
             ~/.cache/bazel-repository-cache
             ~/.cache/xdg-cache
-          key: bazel-cache-${{ matrix.bazel-version.version }}-${{ matrix.bzlmod }}-${{ matrix.os }}-${{ matrix.folder }}-${{ hashFiles('.bazelrc', '.bazelversion', '.bazeliskrc', '**/BUILD', '**/BUILD.bazel', '**/*.bzl', 'WORKSPACE', 'WORKSPACE.bazel', 'WORKSPACE.bzlmod', 'MODULE.bazel') }}
-          restore-keys: bazel-cache-${{ matrix.bazel-version.version }}-${{ matrix.bzlmod }}-${{ matrix.os }}-${{ matrix.folder }}-
+          key: bazel-cache-${{ matrix.bzlmod }}-${{ matrix.os }}-${{ matrix.folder }}-${{ hashFiles('.bazelrc', '.bazelversion', '.bazeliskrc', '**/BUILD', '**/BUILD.bazel', '**/*.bzl', 'WORKSPACE', 'WORKSPACE.bazel', 'WORKSPACE.bzlmod', 'MODULE.bazel') }}
+          restore-keys: bazel-cache-${{ matrix.bzlmod }}-${{ matrix.os }}-${{ matrix.folder }}-
 
       - name: Configure Bazel version
         working-directory: ${{ matrix.folder }}
         shell: bash
         run: |
-          # Overwrite the .bazelversion instead of using USE_BAZEL_VERSION so that Bazelisk
-          # still bootstraps Aspect CLI from configuration in .bazeliskrc. Aspect CLI will
-          # then use .bazelversion to determine which Bazel version to use.
-          echo "${{ matrix.bazel-version.version }}" > .bazelversion
           # Delete all the version specific bazelrc files that are used for local development
           # since the version we're testing against is dynamic. These are just symlinks and the
           # root .bazelrc brings these in with try-imports. In this CI workflows, we explicitly
@@ -118,12 +92,10 @@ jobs:
         shell: bash
         run: |
           bazel \
-            --bazelrc=${GITHUB_WORKSPACE//\\/\/}/.github/workflows/bazel${{ matrix.bazel-version.major }}.bazelrc \
+            --bazelrc=${GITHUB_WORKSPACE//\\/\/}/.github/workflows/bazel7.bazelrc \
             --bazelrc=${GITHUB_WORKSPACE//\\/\/}/.aspect/bazelrc/ci.bazelrc \
             --bazelrc=${GITHUB_WORKSPACE//\\/\/}/.github/workflows/ci.bazelrc \
             test \
-            --test_tag_filters=-skip-on-bazel${{ matrix.bazel-version.major }} \
-            --build_tag_filters=-skip-on-bazel${{ matrix.bazel-version.major }} \
             --enable_bzlmod=${{ matrix.bzlmod }} \
             //...
         env:
