@@ -22,5 +22,4 @@ def _resolved_toolchain_impl(ctx):
 resolved_toolchain = rule(
     implementation = _resolved_toolchain_impl,
     toolchains = ["@aspect_rules_esbuild//esbuild:toolchain_type"],
-    incompatible_use_toolchain_transition = True,
 )
