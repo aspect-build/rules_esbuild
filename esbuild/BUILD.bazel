@@ -29,6 +29,8 @@ bzl_library(
     deps = [
         "//esbuild/private:toolchains_repo",
         "//esbuild/private:versions",
+        "@aspect_rules_js//npm:repositories",
+        "@bazel_skylib//lib:versions",
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
     ] + (["@bazel_tools//tools/build_defs/repo:cache.bzl"] if is_bazel_7_or_greater() else []),

@@ -95,6 +95,7 @@ def esbuild_register_toolchains(name, esbuild_version, register = True, **kwargs
     - create a repository exposing toolchains for each platform like "esbuild_platforms"
     - register a toolchain pointing at each platform
     Users can avoid this macro and do these steps themselves, if they want more control.
+
     Args:
         name: base name for all created repos, like "esbuild0_14"
         esbuild_version: a supported version like "0.14.36"
