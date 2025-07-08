@@ -23,7 +23,10 @@ def esbuild(name, output_dir = False, splitting = False, config = None, **kwargs
     srcs = kwargs.pop("srcs", [])
     deps = kwargs.pop("deps", [])
     entry_points = kwargs.get("entry_points", None)
-    tsconfig = kwargs.pop("tsconfig", Label("@aspect_rules_esbuild//esbuild/private:empty-json"))
+    empty_tsconfig = Label("@aspect_rules_esbuild//esbuild/private:empty-json")
+    tsconfig = kwargs.pop("tsconfig", empty_tsconfig)
+    if tsconfig == empty_tsconfig:
+        deps.append(tsconfig)
 
     target = kwargs.pop("target", ["es2015"])
     if type(target) == "string":
