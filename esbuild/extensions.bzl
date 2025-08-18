@@ -1,5 +1,6 @@
 "extensions for bzlmod"
 
+load("@aspect_tools_telemetry_report//:defs.bzl", "TELEMETRY")  # buildifier: disable=load
 load(":repositories.bzl", "DEFAULT_ESBUILD_REPOSITORY", "esbuild_register_toolchains")
 
 esbuild_toolchain = tag_class(attrs = {
