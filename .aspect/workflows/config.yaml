@@ -5,34 +5,34 @@ workspaces:
     label: rules_esbuild
   e2e/smoke:
     icon: bazel
-    tasks:
+    tasks: &skip-format-buildifier
       - format:
           without: true
       - buildifier:
           without: true
   e2e/bundle:
-    icon: bazel
     tasks:
       - format:
           without: true
       - buildifier:
           without: true
+  e2e/custom_version:
+    tasks: *skip-format-buildifier
   e2e/npm-links:
-    icon: bazel
     tasks:
       - format:
           without: true
       - buildifier:
           without: true
   e2e/sourcemaps:
-    icon: bazel
     tasks:
       - format:
           without: true
       - buildifier:
           without: true
+  e2e/toolchain_from_source:
+    tasks: *skip-format-buildifier
   e2e/tsconfig:
-    icon: bazel
     tasks:
       - format:
           without: true
