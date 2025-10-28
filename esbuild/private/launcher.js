@@ -1,6 +1,15 @@
+if (!process.env.ESBUILD_BINARY_PATH) {
+  console.error('Expected environment variable ESBUILD_BINARY_PATH to be set')
+  process.exit(1)
+}
+// Adjust the path to first walk out from the cwd, which is set to the bazel bin directory.
+const { join, normalize } = require('path')
+process.env.ESBUILD_BINARY_PATH = normalize(
+  join('..', '..', '..', process.env.ESBUILD_BINARY_PATH)
+)
+
 const { readFileSync, writeFileSync } = require('fs')
 const { pathToFileURL } = require('url')
-const { join } = require('path')
 const esbuild = require('esbuild')
 const { bazelSandboxPlugin } = require('./plugins/bazel-sandbox.js')
 
@@ -95,11 +104,6 @@ async function processConfigFile(configFilePath, existingArgs = {}) {
     }
     return prev
   }, {})
-}
-
-if (!process.env.ESBUILD_BINARY_PATH) {
-  console.error('Expected environment variable ESBUILD_BINARY_PATH to be set')
-  process.exit(1)
 }
 
 async function runOneBuild(args, userArgsFilePath, configFilePath) {
