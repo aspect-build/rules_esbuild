@@ -17,15 +17,28 @@ DEFAULT_ESBUILD_REPOSITORY = "esbuild"
 
 _DOC = "Fetch external tools needed for esbuild toolchain"
 _ATTRS = {
-    "esbuild_version": attr.string(mandatory = True, values = TOOL_VERSIONS.keys()),
+    "esbuild_version": attr.string(mandatory = True),
     "platform": attr.string(mandatory = True),
+    "integrity": attr.string(),
     # The default doesn't appear here because the value depends on the version being used.
     "url": attr.string(),
 }
 
+def _fail__no_integrity(esbuild_version, platform):
+    fail("""\
+esbuild version {} is missing an integrity hash for platform {}
+
+Possible resolutions:
+  - supply the integrity attribute with a valid hash for this platform
+  - choose one of these available versions, where integrity hashes are vendored into rules_esbuild: {}
+""".format(esbuild_version, platform, TOOL_VERSIONS.keys()))
+
 def _esbuild_repo_impl(repository_ctx):
-    esbuild = TOOL_VERSIONS[repository_ctx.attr.esbuild_version]
-    integrity = esbuild[repository_ctx.attr.platform]
+    integrity = repository_ctx.attr.integrity
+    if not integrity and repository_ctx.attr.esbuild_version in TOOL_VERSIONS.keys():
+        integrity = TOOL_VERSIONS[repository_ctx.attr.esbuild_version][repository_ctx.attr.platform]
+    if not integrity:
+        _fail__no_integrity(repository_ctx.attr.esbuild_version, repository_ctx.attr.platform)
     url = repository_ctx.attr.url
     if not url:
         url = (
@@ -86,7 +99,7 @@ esbuild_repositories = repository_rule(
 )
 
 # Wrapper macro around everything above, this is the primary API
-def esbuild_register_toolchains(name, esbuild_version, register = True, **kwargs):
+def esbuild_register_toolchains(name, esbuild_version, integrity = {}, register = True, **kwargs):
     """Convenience macro for users which does typical setup.
 
     - create a repository for each built-in platform like "esbuild_linux-64" -
@@ -99,20 +112,16 @@ def esbuild_register_toolchains(name, esbuild_version, register = True, **kwargs
     Args:
         name: base name for all created repos, like "esbuild0_14"
         esbuild_version: a supported version like "0.14.36"
+        integrity: optional dict mapping platform strings to integrity hashes
         register: whether to call through to native.register_toolchains.
             Should be True for WORKSPACE users, but false when used under bzlmod extension
         **kwargs: passed to each node_repositories call
     """
-    if esbuild_version not in TOOL_VERSIONS.keys():
-        fail("""\
-esbuild version {} is not currently mirrored into rules_esbuild.
-Please instead choose one of these available versions: {}
-Or, make a PR to the repo running /scripts/mirror_release.sh to add the newest version.
-If you need custom versions, please file an issue.""".format(esbuild_version, TOOL_VERSIONS.keys()))
     for platform in get_platforms(esbuild_version).keys():
         esbuild_repositories(
             name = name + "_" + platform,
             esbuild_version = esbuild_version,
+            integrity = integrity.get(platform, None) if integrity else None,
             platform = platform,
             **kwargs
         )
@@ -125,10 +134,17 @@ If you need custom versions, please file an issue.""".format(esbuild_version, TO
         user_repository_name = name,
     )
 
+    if integrity and "npm" in integrity.keys():
+        npm_package_integrity = integrity["npm"]
+    elif esbuild_version in TOOL_VERSIONS:
+        npm_package_integrity = TOOL_VERSIONS[esbuild_version]["npm"]
+    else:
+        _fail__no_integrity(esbuild_version, "npm")
     npm_import(
         name = "npm__esbuild_" + esbuild_version,
         lifecycle_hooks = [],
-        integrity = TOOL_VERSIONS[esbuild_version]["npm"],
+        # buildifier: disable=uninitialized
+        integrity = npm_package_integrity,
         package = "esbuild",
         version = esbuild_version,
     )

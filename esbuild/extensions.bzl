@@ -9,12 +9,16 @@ esbuild_toolchain = tag_class(attrs = {
         default = DEFAULT_ESBUILD_REPOSITORY,
     ),
     "esbuild_version": attr.string(doc = "Explicit version of esbuild."),
+    "integrity": attr.string_dict(
+        doc = "Optional integrity hashes for the esbuild binary for needed platforms.",
+    ),
     # TODO: support this variant
     # "esbuild_version_from": attr.string(doc = "Location of package.json which may have a version for @esbuild/core."),
 })
 
 def _toolchain_extension(module_ctx):
     registrations = {}
+    integrity_overrides = {}
     for mod in module_ctx.modules:
         for toolchain in mod.tags.toolchain:
             if toolchain.name != DEFAULT_ESBUILD_REPOSITORY and not mod.is_root:
@@ -35,10 +39,13 @@ def _toolchain_extension(module_ctx):
                 ))
             else:
                 registrations[toolchain.name] = toolchain.esbuild_version
+                if toolchain.integrity:
+                    integrity_overrides[toolchain.esbuild_version] = toolchain.integrity
     for name, esbuild_version in registrations.items():
         esbuild_register_toolchains(
             name = name,
             esbuild_version = esbuild_version,
+            integrity = integrity_overrides.get(esbuild_version, None),
             register = False,
         )
 
