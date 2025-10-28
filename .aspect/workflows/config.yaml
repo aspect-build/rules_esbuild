@@ -44,13 +44,7 @@ tasks:
       update_strategy: rebase
   - buildifier:
       queue: aspect-small
-  - test:
-      name: 'Test (Bazel 6)'
-      env:
-        USE_BAZEL_VERSION: 6.x
-      bazel:
-        flags:
-          - --test_tag_filters=-skip-on-bazel6
+  # NOTE: Bazel 6 ought to work, but is ending LTS end of 2025
   - test:
       name: 'Test (Bazel 7)'
       env:
