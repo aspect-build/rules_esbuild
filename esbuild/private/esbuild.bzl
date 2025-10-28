@@ -317,7 +317,7 @@ def _esbuild_impl(ctx):
 
     env = {
         "BAZEL_BINDIR": ctx.bin_dir.path,
-        "ESBUILD_BINARY_PATH": "../../../" + esbuild_toolinfo.target_tool_path,
+        "ESBUILD_BINARY_PATH": esbuild_toolinfo.target_tool_path,
     }
 
     if ctx.attr.bazel_sandbox_plugin:

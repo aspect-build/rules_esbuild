@@ -1,0 +1,14 @@
+bazel_dep(name = "aspect_rules_esbuild", version = "0.0.0")
+local_path_override(
+    module_name = "aspect_rules_esbuild",
+    path = "../..",
+)
+
+bazel_dep(name = "rules_go", version = "0.58.2")
+bazel_dep(name = "gazelle", version = "0.45.0")
+
+go_tool_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
+go_tool_deps.from_file(go_mod = "//tools:go.mod")
+use_repo(go_tool_deps, "com_github_evanw_esbuild")
+
+register_toolchains("//toolchains:all")
