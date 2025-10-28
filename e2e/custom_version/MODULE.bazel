@@ -4,6 +4,8 @@ local_path_override(
     path = "../..",
 )
 
+bazel_dep(name = "aspect_bazel_lib", version = "2.7.7", dev_dependency = True)
+
 esbuild = use_extension("@aspect_rules_esbuild//esbuild:extensions.bzl", "esbuild")
 esbuild.toolchain(
     name = "esbuild",
@@ -11,10 +13,10 @@ esbuild.toolchain(
     integrity = {
         # curl --silent https://registry.npmjs.org/esbuild/0.25.10 | jq --raw-output .dist.integrity
         "npm": "sha512-9RiGKvCwaqxO2owP61uQ4BgNborAQskMR6QusfWzQqv7AZOg5oGehdY2pRJMTKuwxd1IDBP4rSbI5lHzU7SMsQ==",
-        # Remaining hashes can be computed from binary release artifacts, see
-        # https://esbuild.github.io/getting-started/#download-a-build
-        "darwin-arm64": "sha512-VekY0PBCukppoQrycFxUqkCojnTQhdec0vevUL/EDOCnXd9LKWqD/bHwMPzigIJXPhC59Vd1WFIL57SKs2mg4w==",
-        "linux-x64": "sha512-HSFAT4+WYjIhrHxKBwGmOOSpphjYkcswF449j6EjsjbinTZbp8PJtjsVK1XFJStdzXdy/jaddAep2FGY+wyFAQ==",
+        # curl --silent https://registry.npmjs.org/@esbuild/darwin-arm64/0.25.10 | jq --raw-output .dist.integrity
+        "darwin-arm64": "sha512-JC74bdXcQEpW9KkV326WpZZjLguSZ3DfS8wrrvPMHgQOIEIG/sPXEN/V8IssoJhbefLRcRqw6RQH2NnpdprtMA==",
+        # curl --silent https://registry.npmjs.org/@esbuild/linux-x64/0.25.10 | jq --raw-output .dist.integrity
+        "linux-x64": "sha512-QSX81KhFoZGwenVyPoberggdW1nrQZSvfVDAIUXr3WqLRZGZqWk/P4T8p2SP+de2Sr5HPcvjhcJzEiulKgnxtA==",
     },
 )
 use_repo(esbuild, "esbuild_toolchains")

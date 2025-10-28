@@ -1,74 +1,48 @@
 # See https://docs.aspect.build/workflows/configuration
 workspaces:
-    .:
-        icon: esbuild
-        label: rules_esbuild
-    e2e/smoke:
-        icon: bazel
-        tasks:
-            - format:
-                  without: true
-            - buildifier:
-                  without: true
-    e2e/bundle:
-        icon: bazel
-        tasks:
-            - format:
-                  without: true
-            - buildifier:
-                  without: true
-    e2e/npm-links:
-        icon: bazel
-        tasks:
-            - format:
-                  without: true
-            - buildifier:
-                  without: true
-    e2e/sourcemaps:
-        icon: bazel
-        tasks:
-            - format:
-                  without: true
-            - buildifier:
-                  without: true
-    e2e/tsconfig:
-        icon: bazel
-        tasks:
-            - format:
-                  without: true
-            - buildifier:
-                  without: true
+  .:
+    icon: esbuild
+    label: rules_esbuild
+  e2e/smoke:
+    tasks: &skip-format-buildifier
+      - format:
+          without: true
+      - buildifier:
+          without: true
+  e2e/bundle:
+    tasks: *skip-format-buildifier
+  e2e/custom_version:
+    tasks: *skip-format-buildifier
+  e2e/npm-links:
+    tasks: *skip-format-buildifier
+  e2e/sourcemaps:
+    tasks: *skip-format-buildifier
+  e2e/toolchain_from_source:
+    tasks: *skip-format-buildifier
+  e2e/tsconfig:
+    tasks: *skip-format-buildifier
 
 tasks:
-    - checkout:
-            update_strategy: rebase
-    - buildifier:
-            queue: aspect-medium
-    - test:
-    - test:
-            name: "WORKSPACE"
-            bazel:
-                  flags:
-                        - --noenable_bzlmod
-                        - --enable_workspace
-    - test:
-            name: "Bazel 6"
-            hooks:
-                  - type: before_task
-                    command: echo '6.5.0' > .bazelversion
-            bazel:
-                  flags:
-                        - --test_tag_filters=-skip-on-bazel6
-    - test:
-            name: "Bazel 6 WORKSPACE"
-            hooks:
-                  - type: before_task
-                    command: echo '6.5.0' > .bazelversion
-            bazel:
-                  flags:
-                        - --test_tag_filters=-skip-on-bazel6
-                        - --noenable_bzlmod
-    - finalization:
-            queue: aspect-small
+  - checkout:
+      update_strategy: rebase
+  - buildifier:
+      queue: aspect-small
+  # NOTE: Bazel 6 ought to work, but is ending LTS end of 2025
+  - test:
+      name: 'Test (Bazel 7)'
+      env:
+        USE_BAZEL_VERSION: 7.x
+      bazel:
+        flags:
+          - --test_tag_filters=-skip-on-bazel7
+  - test:
+      name: 'Test (Bazel 8)'
+      env:
+        USE_BAZEL_VERSION: 8.x
+      bazel:
+        flags:
+          - --test_tag_filters=-skip-on-bazel8
+  - finalization:
+      queue: aspect-small
 notifications:
-      github: {}
+  github: {}

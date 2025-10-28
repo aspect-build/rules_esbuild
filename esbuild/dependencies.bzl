@@ -3,7 +3,11 @@
 Should be replaced by bzlmod for users of Bazel 6.0 and above.
 """
 
-load("//esbuild/private:maybe.bzl", http_archive = "maybe_http_archive")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", _http_archive = "http_archive")
+load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
+
+def http_archive(**kwargs):
+    maybe(_http_archive, **kwargs)
 
 def rules_esbuild_dependencies():
     http_archive(
