@@ -4,8 +4,7 @@ Users should *not* need to install these. If users see a load()
 statement from these, that's a bug in our distribution.
 """
 
-# buildifier: disable=bzl-visibility
-load("//esbuild/private:maybe.bzl", http_archive = "maybe_http_archive")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def rules_esbuild_internal_deps():
     "Fetch deps needed for local development"
