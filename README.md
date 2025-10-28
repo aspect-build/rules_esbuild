@@ -20,15 +20,15 @@ copy the WORKSPACE snippet into your `WORKSPACE` file.
 
 ## Usage
 
-See the [API documentation](./docs/rules.md),
+See the [API documentation](https://registry.bazel.build/docs/aspect_rules_esbuild),
 and the example usage in the [`examples/`](https://github.com/aspect-build/rules_esbuild/tree/main/examples/) directory.
 Note that the examples rely on code in the `/WORKSPACE` file in the root of this repo.
 
 ## From a BUILD file
 
-The simplest usage is with the [`esbuild` macro](./docs/rules.md#esbuild).
+The simplest usage is with the `esbuild` macro.
 
-If needed, instead of the macro you could call the underlying [`esbuild_bundle` rule](./docs/esbuild.md#esbuild_bundle) directly.
+If needed, instead of the macro you could call the underlying `esbuild_bundle` rule directly.
 
 # In a macro
 
