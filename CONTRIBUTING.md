@@ -38,6 +38,6 @@ This means that any usage of `@rules_esbuild` on your system will point to this 
 
 ## Releasing
 
-1. Determine the next release version, following semver (could automate in the future from changelog)
-1. Tag the repo and push it (or create a tag in GH UI)
-1. Watch the automation run on GitHub actions
+Press the button on https://github.com/aspect-build/rules_esbuild/actions/workflows/tag.yaml
+
+If needed, you can manually push a specific v1.2.3-style tag instead.
