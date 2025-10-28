@@ -62,3 +62,5 @@ You'll need these things:
    `@aspect_rules_esbuild//esbuild:toolchain_type` as its `toolchain_type`.
 4. A call to [the `register_toolchains` function](https://bazel.build/rules/lib/globals#register_toolchains)
    in your `WORKSPACE` that refers to the `toolchain` rule defined in step 3.
+
+See e2e/toolchain_from_source for a complete example.
