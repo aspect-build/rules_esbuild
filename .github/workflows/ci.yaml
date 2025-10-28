@@ -18,37 +18,15 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 jobs:
-  # Prepares dynamic test matrix values
-  matrix-prep:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - id: os
-        name: Prepare 'os' matrix axis
-        # Only run MacOS and Windows on main branch (not PRs) to minimize minutes (billed at 10X and 2X respectively)
-        # https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#included-storage-and-minutes
-        run: |
-          a=( ubuntu )
-          if [[ "${{ github.ref_name }}" == "main" ]] || [[ "${{ github.head_ref }}" == *"macos"* ]]; then
-            a+=( macos )
-          fi
-          if [[ "${{ github.ref_name }}" == "main" ]] || [[ "${{ github.head_ref }}" == *"windows"* ]]; then
-            a+=( windows )
-          fi
-          printf -v j '"%s",' "${a[@]}"
-          echo "res=[${j%,}]" | tee -a $GITHUB_OUTPUT
-    outputs:
-      os: ${{ steps.os.outputs.res }}
-
   test:
-    runs-on: ${{ matrix.os }}-latest
-    needs:
-      - matrix-prep
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        bzlmod: [1, 0]
-        os: ${{ fromJSON(needs.matrix-prep.outputs.os) }}
+        # Note: linux is tested on Buildkite using Aspect Workflows
+        os:
+          - macos-latest
+          # - windows-latest
         folder:
           - '.'
           - 'e2e/smoke'
@@ -58,45 +36,8 @@ jobs:
           - 'e2e/bundle'
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Mount bazel caches
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/bazel-disk-cache
-            ~/.cache/bazel-repository-cache
-            ~/.cache/xdg-cache
-          key: bazel-cache-${{ matrix.bzlmod }}-${{ matrix.os }}-${{ matrix.folder }}-${{ hashFiles('.bazelrc', '.bazelversion', '.bazeliskrc', '**/BUILD', '**/BUILD.bazel', '**/*.bzl', 'WORKSPACE', 'WORKSPACE.bazel', 'WORKSPACE.bzlmod', 'MODULE.bazel') }}
-          restore-keys: bazel-cache-${{ matrix.bzlmod }}-${{ matrix.os }}-${{ matrix.folder }}-
-
-      - name: Configure Bazel version
+      - uses: actions/checkout@v5
+      - uses: bazel-contrib/setup-bazel@0.15.0
+      - run: bazel test //...
         working-directory: ${{ matrix.folder }}
         shell: bash
-        run: |
-          # Delete all the version specific bazelrc files that are used for local development
-          # since the version we're testing against is dynamic. These are just symlinks and the
-          # root .bazelrc brings these in with try-imports. In this CI workflows, we explicitly
-          # bring in the version specific bazelrc file with --bazelrc when we invoke bazel.
-          rm ${GITHUB_WORKSPACE//\\/\/}/.aspect/bazelrc/bazel*.bazelrc
-
-      # TODO: remove this block once we have Aspect CLI Windows releases
-      - name: Don't use Aspect CLI on Windows
-        if: matrix.os == 'windows'
-        working-directory: ${{ matrix.folder }}
-        shell: bash
-        run: rm -f .bazeliskrc
-
-      - name: bazel test //...
-        working-directory: ${{ matrix.folder }}
-        shell: bash
-        run: |
-          bazel \
-            --bazelrc=${GITHUB_WORKSPACE//\\/\/}/.github/workflows/bazel7.bazelrc \
-            --bazelrc=${GITHUB_WORKSPACE//\\/\/}/.aspect/bazelrc/ci.bazelrc \
-            --bazelrc=${GITHUB_WORKSPACE//\\/\/}/.github/workflows/ci.bazelrc \
-            test \
-            --enable_bzlmod=${{ matrix.bzlmod }} \
-            //...
-        env:
-          XDG_CACHE_HOME: ~/.cache/xdg-cache # bazelisk will download bazel to here
