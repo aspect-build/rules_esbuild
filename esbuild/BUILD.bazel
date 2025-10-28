@@ -2,9 +2,6 @@ load("@aspect_bazel_lib//lib:utils.bzl", "is_bazel_7_or_greater")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("//esbuild/private:resolved_toolchain.bzl", "resolved_toolchain")
 
-# For stardoc to reference the files
-exports_files(["defs.bzl"])
-
 # This is the target rule authors should put in their "toolchains"
 # attribute in order to get a runtime for the correct platform.
 # See https://docs.bazel.build/versions/main/toolchains.html#writing-rules-that-use-toolchains
@@ -47,6 +44,13 @@ bzl_library(
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
     ] + (["@bazel_tools//tools/build_defs/repo:cache.bzl"] if is_bazel_7_or_greater() else []),
+)
+
+starlark_doc_extract(
+    name = "defs.doc_extract",
+    src = "defs.bzl",
+    visibility = ["//visibility:public"],
+    deps = [":defs"],
 )
 
 bzl_library(
