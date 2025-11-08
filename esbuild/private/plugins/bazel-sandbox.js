@@ -39,6 +39,16 @@ async function resolveInExecroot(build, importPath, otherOptions) {
     return result
   }
 
+  // External modules are intentionally outside the bundle and don't need path validation
+  if (result.external) {
+    if (!!process.env.JS_BINARY__LOG_DEBUG) {
+      console.error(
+        `DEBUG: [bazel-sandbox] skipping sandbox validation for external module: ${result.path}`
+      )
+    }
+    return result
+  }
+
   if (
     !result.path.startsWith('.') &&
     !result.path.startsWith('/') &&
