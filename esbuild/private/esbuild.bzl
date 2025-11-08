@@ -336,6 +336,7 @@ def _esbuild_impl(ctx):
     # setup the args passed to the launcher
     launcher_args = ctx.actions.args()
     other_inputs = []
+    config_deps = []
 
     args_file = write_args_file(ctx, args)
     other_inputs.append(args_file)
@@ -356,6 +357,7 @@ def _esbuild_impl(ctx):
     if ctx.attr.config:
         config_bin_copy = copy_file_to_bin_action(ctx, ctx.file.config)
         other_inputs.append(config_bin_copy)
+        config_deps.append(ctx.attr.config)
         launcher_args.add("--config_file=%s" % _bin_relative_path(ctx, config_bin_copy))
 
     # stamp = ctx.attr.node_context_data[NodeContextInfo].stamp
@@ -373,7 +375,7 @@ def _esbuild_impl(ctx):
             if not (file.path.endswith(".d.ts") or file.path.endswith(".tsbuildinfo"))
         ]) + entry_points_bin_copy + [tsconfig_bin_copy] + other_inputs + node_toolinfo.tool_files + esbuild_toolinfo.tool_files,
         transitive = [js_lib_helpers.gather_files_from_js_infos(
-            targets = ctx.attr.srcs + ctx.attr.deps,
+            targets = ctx.attr.srcs + ctx.attr.deps + config_deps,
             include_sources = True,
             include_types = False,
             include_transitive_sources = True,

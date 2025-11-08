@@ -1,15 +1,21 @@
 load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@esbuild_plugins//:defs.bzl", "npm_link_all_packages")
 
 npm_link_all_packages(name = "node_modules")
 
-esbuild(
-    name = "bundle",
-    srcs = [
-        "logo.svg",
+js_library(
+    name = "config",
+    srcs = ["esbuild.config.mjs"],
+    deps = [
         ":node_modules/esbuild-plugin-svg",
     ],
-    config = "esbuild.config.mjs",
+)
+
+esbuild(
+    name = "bundle",
+    srcs = ["logo.svg"],
+    config = ":config",
     entry_point = "main.js",
     # using the select statement will download toolchains for all three platforms in an unconfigured build (e.g. query rather than cquery)
     # you can also just provide an individual toolchain if you don't want to download them all
