@@ -1,0 +1,53 @@
+load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@aspect_rules_js//js:defs.bzl", "js_library", "js_test")
+load(":providers_test.bzl", "bundle_jsinfo_excludes_srcs_deps_test", "bundle_runfiles_include_data_test")
+
+js_test(
+    name = "runner",
+    data = [":bundle"],
+    entry_point = "bundle.js",
+)
+
+esbuild(
+    name = "bundle",
+    data = ["pig.txt"],
+    entry_point = "main.js",
+    platform = "node",
+    deps = [":lib"],
+)
+
+js_library(
+    name = "lib",
+    srcs = ["main.js"],
+    data = ["cow.txt"],
+)
+
+# A second bundle exercised purely by analysistest: it has both an
+# explicit `srcs` and `deps` so the provider assertions can check that
+# neither is forwarded in the output JsInfo.
+esbuild(
+    name = "bundle_for_provider_test",
+    srcs = ["direct_src.js"],
+    data = ["pig.txt"],
+    entry_point = "bundle_entry.js",
+    platform = "node",
+    tags = ["manual"],
+    deps = [":lib_for_provider_test"],
+)
+
+js_library(
+    name = "lib_for_provider_test",
+    srcs = ["lib_src.js"],
+    data = ["cow.txt"],
+    tags = ["manual"],
+)
+
+bundle_jsinfo_excludes_srcs_deps_test(
+    name = "bundle_jsinfo_excludes_srcs_deps_test",
+    target_under_test = ":bundle_for_provider_test",
+)
+
+bundle_runfiles_include_data_test(
+    name = "bundle_runfiles_include_data_test",
+    target_under_test = ":bundle_for_provider_test",
+)
