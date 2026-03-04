@@ -12,7 +12,9 @@ for arg in "$@"; do
         esbuild_args_file="${arg#*=}"
     fi
 done
-jq --raw-output '.entryPoints[]' $esbuild_args_file | xargs \
+entry_points=$(sed -n 's/.*"entryPoints":\["\([^]]*\)"\].*/\1/p' $esbuild_args_file | tr '","' ' ')
+outfile=$(sed -n 's/.*"outfile":"\([^"]*\)".*/\1/p' $esbuild_args_file)
+echo $entry_points | xargs \
     $ESBUILD_BINARY_PATH \
-    --outfile=$(jq --raw-output '.outfile' $esbuild_args_file) \
+    --outfile=$outfile \
     --sourcemap --loader:.js=jsx
