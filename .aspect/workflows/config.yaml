@@ -44,6 +44,13 @@ tasks:
       bazel:
         flags:
           - --test_tag_filters=-skip-on-bazel8
+  - test:
+      name: 'Test (Bazel 9)'
+      env:
+        USE_BAZEL_VERSION: 9.x
+      bazel:
+        flags:
+          - --test_tag_filters=-skip-on-bazel9
   - finalization:
       queue: aspect-small
 notifications:
