@@ -23,34 +23,9 @@ tar --create --auto-compress \
     --file "$GITHUB_WORKSPACE/${ARCHIVE%.tar.gz}.docs.tar.gz" .
 
 cat << EOF
-## Using [Bzlmod] with Bazel 6:
-
 Add to your \`MODULE.bazel\` file:
 
 \`\`\`starlark
 bazel_dep(name = "aspect_rules_esbuild", version = "${TAG:1}")
-\`\`\`
-
-[Bzlmod]: https://bazel.build/build/bzlmod
-
-## Using WORKSPACE
-
-\`\`\`starlark
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-http_archive(
-    name = "aspect_rules_esbuild",
-    sha256 = "${SHA}",
-    strip_prefix = "${PREFIX}",
-    url = "https://github.com/aspect-build/rules_esbuild/releases/download/${TAG}/${ARCHIVE}",
-)
-EOF
-awk 'f;/--SNIP--/{f=1}' e2e/smoke/WORKSPACE.bazel
-echo "\`\`\`"
-
-cat << EOF
-To use rules_esbuild with bazel-lib 2.0, you must additionally register the coreutils toolchain.
-\`\`\`starlark
-load("@aspect_bazel_lib//lib:repositories.bzl", "register_coreutils_toolchains")
-register_coreutils_toolchains()
 \`\`\`
 EOF

@@ -1,6 +1,6 @@
 """Starlark helper to fetch rules_esbuild dependencies.
 
-Should be replaced by bzlmod for users of Bazel 6.0 and above.
+Should be replaced by bzlmod.
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", _http_archive = "http_archive")
