@@ -45,6 +45,10 @@ def esbuild(name, output_dir = False, splitting = False, config = None, **kwargs
     if type(splitting) != "bool":
         fail("splitting expected to be a bool")
 
+    sourcemap = kwargs.pop("sourcemap", "linked")
+    if sourcemap:
+        kwargs.update([["sourcemap", sourcemap]])
+
     if output_dir or entry_points or splitting:
         _esbuild(
             name = name,
@@ -65,11 +69,8 @@ def esbuild(name, output_dir = False, splitting = False, config = None, **kwargs
         # Default sourcemaps to "linked".
         # Leave undefined if set to a False-y value.
         output_map = None
-        sourcemap = kwargs.pop("sourcemap", "linked")
-        if sourcemap:
-            kwargs.update([["sourcemap", sourcemap]])
-            if sourcemap != "inline":
-                output_map = "%s.map" % output
+        if sourcemap and sourcemap != "inline":
+            output_map = "%s.map" % output
 
         _esbuild(
             name = name,

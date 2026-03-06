@@ -39,6 +39,20 @@ build_test(
 )
 
 esbuild(
+    name = "sourcemap-falsy-splitting",
+    testonly = 1,
+    srcs = SRCS,
+    entry_points = [ENTRY],
+    sourcemap = False,
+    splitting = True,
+)
+
+build_test(
+    name = "falsy-splitting",
+    targets = [":sourcemap-falsy-splitting"],
+)
+
+esbuild(
     name = "sourcemap-none",
     testonly = 1,
     srcs = SRCS,
