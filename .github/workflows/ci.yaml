@@ -18,26 +18,20 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 jobs:
-  test:
+  # Mac/Windows smoke tests - linux is tested via Aspect Workflows
+  # Only run on main branch (not PRs) to minimize minutes (billed at 10X and 2X respectively)
+  # https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions#included-storage-and-minutes
+  smoke:
+    if: github.ref_name == 'main' || contains(github.head_ref, 'macos') || contains(github.head_ref, 'windows')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        # Note: linux is tested on Buildkite using Aspect Workflows
-        os:
-          - macos-latest
-          # - windows-latest
+        os: [macos-latest, windows-latest]
         folder:
           - '.'
           - 'e2e/smoke'
           - 'e2e/smoke_rjs3'
-          - 'e2e/custom_version'
-          - 'e2e/npm-links'
-          - 'e2e/sourcemaps'
-          - 'e2e/toolchain_from_source'
-          - 'e2e/tsconfig'
-          - 'e2e/bundle'
-
     steps:
       - uses: actions/checkout@v5
       - uses: bazel-contrib/setup-bazel@0.15.0

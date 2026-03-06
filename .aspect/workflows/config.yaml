@@ -27,29 +27,31 @@ workspaces:
 tasks:
   - checkout:
       update_strategy: rebase
+  - test:
+      name: Bazel 7
+      id: bazel-7
+      bazel:
+        flags: ['--test_tag_filters=-skip-on-bazel7']
+      env:
+        USE_BAZEL_VERSION: '7.x'
+  - test:
+      name: Bazel 8
+      id: bazel-8
+      bazel:
+        flags: ['--test_tag_filters=-skip-on-bazel8']
+      env:
+        USE_BAZEL_VERSION: '8.x'
+  - test:
+      name: Bazel 9
+      id: bazel-9
+      bazel:
+        flags: ['--test_tag_filters=-skip-on-bazel9']
+      env:
+        USE_BAZEL_VERSION: '9.x'
+  - format:
+      queue: aspect-medium
   - buildifier:
-      queue: aspect-small
-  - test:
-      name: 'Test (Bazel 7)'
-      env:
-        USE_BAZEL_VERSION: 7.x
-      bazel:
-        flags:
-          - --test_tag_filters=-skip-on-bazel7
-  - test:
-      name: 'Test (Bazel 8)'
-      env:
-        USE_BAZEL_VERSION: 8.x
-      bazel:
-        flags:
-          - --test_tag_filters=-skip-on-bazel8
-  - test:
-      name: 'Test (Bazel 9)'
-      env:
-        USE_BAZEL_VERSION: 9.x
-      bazel:
-        flags:
-          - --test_tag_filters=-skip-on-bazel9
+      queue: aspect-medium
   - finalization:
       queue: aspect-small
 notifications:
