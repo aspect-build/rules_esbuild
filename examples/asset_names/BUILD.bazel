@@ -1,0 +1,31 @@
+"Example demonstrating assetNames support via esbuild config and out_dirs"
+
+load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("//examples:asserts.bzl", "assert_contains")
+
+# Uses a config dict to set assetNames and loader (esbuild options not exposed
+# as direct rule attributes). out_dirs declares the extra output directory that
+# esbuild will write assets into, so Bazel can track it as an output.
+esbuild(
+    name = "bundle",
+    srcs = ["src/logo.png"],
+    config = {
+        "assetNames": "assets/[name]",
+        "loader": {".png": "file"},
+    },
+    entry_point = "src/index.js",
+    out_dirs = ["assets"],
+)
+
+# Verify the bundle JS references the asset path produced by assetNames
+assert_contains(
+    name = "test",
+    actual = ":bundle.js",
+    expected = "assets/logo",
+)
+
+build_test(
+    name = "build_test",
+    targets = [":bundle"],
+)
