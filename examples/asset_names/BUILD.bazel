@@ -1,0 +1,72 @@
+"Example demonstrating assetNames support via esbuild config and out_dirs"
+
+load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("//examples:asserts.bzl", "assert_contains")
+
+# Uses a config dict to set assetNames and loader (esbuild options not exposed
+# as direct rule attributes). out_dirs declares the extra output directory that
+# esbuild will write assets into, so Bazel can track it as an output.
+esbuild(
+    name = "bundle",
+    srcs = ["src/logo.png"],
+    config = {
+        "assetNames": "assets/[name]",
+        "loader": {".png": "file"},
+    },
+    entry_point = "src/index.js",
+    out_dirs = ["assets"],
+)
+
+# Verify the bundle JS references the asset path produced by assetNames.
+assert_contains(
+    name = "test",
+    actual = ":bundle.js",
+    expected = "assets/logo",
+)
+
+# Verify esbuild's emitted asset is captured at the declared TreeArtifact path.
+assert_contains(
+    name = "asset_test",
+    actual = ":bundle",
+    expected = "placeholder png content",
+    file = "examples/asset_names/assets/logo.png",
+)
+
+# When the bundle output is in a nested directory, esbuild writes asset files
+# next to the bundle (i.e. under that nested directory). out_dirs entries must
+# include the same prefix so Bazel can capture them.
+esbuild(
+    name = "nested_bundle",
+    srcs = ["src/logo.png"],
+    config = {
+        "assetNames": "assets/[name]",
+        "loader": {".png": "file"},
+    },
+    entry_point = "src/index.js",
+    out_dirs = ["nested/assets"],
+    output = "nested/nested_bundle.js",
+)
+
+# Verify the bundle JS references the asset path produced by assetNames.
+assert_contains(
+    name = "nested_bundle_js_test",
+    actual = ":nested/nested_bundle.js",
+    expected = "assets/logo",
+)
+
+# Verify esbuild's emitted asset is captured at the declared TreeArtifact path.
+assert_contains(
+    name = "nested_asset_test",
+    actual = ":nested_bundle",
+    expected = "placeholder png content",
+    file = "examples/asset_names/nested/assets/logo.png",
+)
+
+build_test(
+    name = "build_test",
+    targets = [
+        ":bundle",
+        ":nested_bundle",
+    ],
+)

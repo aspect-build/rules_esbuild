@@ -111,6 +111,21 @@ If your JS code contains import statements that import .css files, esbuild will 
 content in a file next to the main output file, which you'll need to declare. If your output
 file is named 'foo.js', you should set this to 'foo.css'.""",
     ),
+    "out_dirs": attr.string_list(
+        default = [],
+        doc = """Additional output directories to declare for this target.
+
+Use this when your esbuild config causes outputs to be written into subdirectories,
+for example when setting assetNames to a path like "assets/[name]-[hash]".
+Bazel requires all action outputs to be declared upfront; each entry becomes a
+declared directory (TreeArtifact) in the rule's DefaultInfo outputs.
+
+Each entry is a path relative to the package, e.g. "assets". When the rule's
+`output` is set to a nested path such as "dist/bundle.js", the entry must
+include the same prefix (e.g. "dist/assets") because esbuild writes asset
+files relative to the directory of `outfile`.
+""",
+    ),
     "output_dir": attr.bool(
         default = False,
         doc = """If true, esbuild produces an output directory containing all output files""",
@@ -276,6 +291,9 @@ def _esbuild_impl(ctx):
         # disable this unless also minifying
         args.update({"ignoreAnnotations": True})
 
+    if ctx.attr.out_dirs and ctx.attr.output_dir:
+        fail("out_dirs is not needed when output_dir = True; esbuild's output directory already captures all files")
+
     if ctx.attr.splitting:
         if not ctx.attr.output_dir:
             fail("output_dir must be set to True when splitting is set to True")
@@ -314,6 +332,10 @@ def _esbuild_impl(ctx):
             output_sources.append(ctx.outputs.output_css)
 
         args.update({"outfile": _bin_relative_path(ctx, js_out)})
+
+    for dir_name in ctx.attr.out_dirs:
+        extra_dir = ctx.actions.declare_directory(dir_name)
+        output_sources.append(extra_dir)
 
     env = {
         "BAZEL_BINDIR": ctx.bin_dir.path,
