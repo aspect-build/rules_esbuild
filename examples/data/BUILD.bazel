@@ -1,0 +1,22 @@
+load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@aspect_rules_js//js:defs.bzl", "js_library", "js_test")
+
+js_test(
+    name = "runner",
+    data = [":bundle"],
+    entry_point = "bundle.js",
+)
+
+esbuild(
+    name = "bundle",
+    data = ["pig.txt"],
+    entry_point = "main.js",
+    platform = "node",
+    deps = [":lib"],
+)
+
+js_library(
+    name = "lib",
+    srcs = ["main.js"],
+    data = ["cow.txt"],
+)
