@@ -419,7 +419,7 @@ def _esbuild_impl(ctx):
             ctx = ctx,
             sources = output_sources_depset,
             data = ctx.attr.data,
-            deps = [],  # when bundling, don't propogate any transitive runfiles from dependencies
+            deps = ctx.attr.srcs + ctx.attr.deps,
         )
     else:
         # If we're not bundling then include all transitive files
