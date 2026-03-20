@@ -1,5 +1,6 @@
 const path = require('path')
 const process = require('process')
+const fs = require('fs')
 
 const bindir = process.env.BAZEL_BINDIR
 const execroot = process.env.JS_BINARY__EXECROOT
@@ -37,6 +38,31 @@ async function resolveInExecroot(build, importPath, otherOptions) {
   if (result.errors && result.errors.length) {
     // There was an error resolving, just return the error as-is.
     return result
+  }
+
+  // If the resolution points to a TypeScript file, check if a corresponding
+  // JavaScript file exists and use that instead. This handles cases where tsconfig paths
+  // resolve to the source .ts file, but we want to bundle the compiled .js file which
+  // is present in the sandbox (via dependencies).
+  if (result.path && !result.external) {
+    const ext = path.extname(result.path)
+    if (['.ts', '.tsx', '.mts', '.cts'].includes(ext)) {
+      const jsExts = {
+        '.ts': '.js',
+        '.tsx': '.js',
+        '.mts': '.mjs',
+        '.cts': '.cjs',
+      }
+      const jsPath = result.path.substring(0, result.path.length - ext.length) + jsExts[ext]
+      if (fs.existsSync(jsPath)) {
+        if (!!process.env.JS_BINARY__LOG_DEBUG) {
+          console.error(
+            `DEBUG: [bazel-sandbox] falling back from ${result.path} to ${jsPath}`
+          )
+        }
+        result.path = jsPath
+      }
+    }
   }
 
   // External modules are intentionally outside the bundle and don't need path validation
