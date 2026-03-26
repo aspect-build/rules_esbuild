@@ -6,7 +6,7 @@ local_path_override(
 
 # NOTE: rules_nodejs 6.7.3 dev version for bazel 9.0.1 compat
 bazel_dep(name = "rules_nodejs", version = "6.7.3", dev_dependency = True, repo_name = None)
-bazel_dep(name = "aspect_bazel_lib", version = "2.7.7", dev_dependency = True)
+bazel_dep(name = "bazel_lib", version = "3.2.2", dev_dependency = True)
 
 esbuild = use_extension("@aspect_rules_esbuild//esbuild:extensions.bzl", "esbuild")
 esbuild.toolchain(

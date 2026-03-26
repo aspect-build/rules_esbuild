@@ -6,7 +6,7 @@ local_path_override(
 
 # NOTE: rules_nodejs 6.7.3 dev version for bazel 9.0.1 compat
 bazel_dep(name = "rules_nodejs", version = "6.7.3", dev_dependency = True, repo_name = None)
-bazel_dep(name = "aspect_rules_js", version = "2.0.0", dev_dependency = True)
+bazel_dep(name = "aspect_rules_js", version = "3.0.3", dev_dependency = True)
 bazel_dep(name = "bazel_skylib", version = "1.5.0", dev_dependency = True)
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependency = True)
@@ -14,6 +14,5 @@ npm.npm_translate_lock(
     name = "npm",
     npmrc = "//:.npmrc",
     pnpm_lock = "//:pnpm-lock.yaml",
-    verify_node_modules_ignored = "//:.bazelignore",
 )
 use_repo(npm, "npm")

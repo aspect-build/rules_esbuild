@@ -1,4 +1,4 @@
-load("@aspect_bazel_lib//lib:testing.bzl", "assert_contains")
+load("@bazel_lib//lib:testing.bzl", "assert_contains")
 load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
 
 SRCS = [
