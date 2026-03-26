@@ -27,9 +27,9 @@ bzl_library(
         "//esbuild/private:versions",
         "@aspect_rules_js//npm:repositories",
         "@bazel_skylib//lib:versions",
+        "@bazel_tools//tools/build_defs/repo:cache.bzl",
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
-        "@bazel_tools//tools/build_defs/repo:cache.bzl",
     ],
 )
 
@@ -41,9 +41,9 @@ bzl_library(
         "//esbuild/private:esbuild",
         "@bazel_skylib//lib:types",
         "@bazel_skylib//rules:write_file",
+        "@bazel_tools//tools/build_defs/repo:cache.bzl",
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
-        "@bazel_tools//tools/build_defs/repo:cache.bzl",
     ],
 )
 

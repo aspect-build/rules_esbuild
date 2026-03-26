@@ -21,13 +21,13 @@ bzl_library(
     visibility = ["//:__subpackages__"],
     deps = [
         ":helpers",
-        "@bazel_lib//lib:copy_to_bin",
-        "@bazel_lib//lib:expand_make_vars",
         "@aspect_rules_js//js:libs",
         "@aspect_rules_js//js:providers",
+        "@bazel_lib//lib:copy_to_bin",
+        "@bazel_lib//lib:expand_make_vars",
+        "@bazel_tools//tools/build_defs/repo:cache.bzl",
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
-        "@bazel_tools//tools/build_defs/repo:cache.bzl",
     ],
 )
 
