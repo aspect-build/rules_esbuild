@@ -1,5 +1,5 @@
-load("@bazel_lib//lib:write_source_files.bzl", "write_source_files")
 load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@bazel_lib//lib:write_source_files.bzl", "write_source_files")
 
 esbuild(
     name = "bundle",
