@@ -8,7 +8,7 @@ module(
 
 # Lower-bounds (minimum) versions for direct runtime dependencies
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
-bazel_dep(name = "aspect_rules_js", version = "2.0.0")
+bazel_dep(name = "aspect_rules_js", version = "3.0.3")
 bazel_dep(name = "aspect_tools_telemetry", version = "0.2.6")
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
 bazel_dep(name = "platforms", version = "0.0.8")
@@ -28,8 +28,6 @@ register_toolchains("@esbuild_toolchains//:all")
 
 ####### Dev dependencies ########
 
-# NOTE: rules_nodejs 6.7.3 dev version for bazel 9.0.1 compat
-bazel_dep(name = "rules_nodejs", version = "6.7.3", dev_dependency = True, repo_name = None)
 bazel_dep(name = "rules_shell", version = "0.4.1", dev_dependency = True)
 bazel_dep(name = "buildifier_prebuilt", version = "6.4.0", dev_dependency = True)
 bazel_dep(name = "stardoc", version = "0.6.2", dev_dependency = True, repo_name = "io_bazel_stardoc")
