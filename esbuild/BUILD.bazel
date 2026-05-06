@@ -1,4 +1,3 @@
-load("@aspect_bazel_lib//lib:utils.bzl", "is_bazel_7_or_greater")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("//esbuild/private:resolved_toolchain.bzl", "resolved_toolchain")
 
@@ -18,7 +17,6 @@ resolved_toolchain(
     visibility = ["//visibility:public"],
 )
 
-# gazelle:exclude dependencies.bzl
 bzl_library(
     name = "repositories",
     srcs = ["repositories.bzl"],
@@ -28,9 +26,10 @@ bzl_library(
         "//esbuild/private:versions",
         "@aspect_rules_js//npm:repositories",
         "@bazel_skylib//lib:versions",
+        "@bazel_tools//tools/build_defs/repo:cache.bzl",
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
-    ] + (["@bazel_tools//tools/build_defs/repo:cache.bzl"] if is_bazel_7_or_greater() else []),
+    ],
 )
 
 bzl_library(
@@ -41,9 +40,10 @@ bzl_library(
         "//esbuild/private:esbuild",
         "@bazel_skylib//lib:types",
         "@bazel_skylib//rules:write_file",
+        "@bazel_tools//tools/build_defs/repo:cache.bzl",
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
-    ] + (["@bazel_tools//tools/build_defs/repo:cache.bzl"] if is_bazel_7_or_greater() else []),
+    ],
 )
 
 starlark_doc_extract(
