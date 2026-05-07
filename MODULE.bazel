@@ -28,9 +28,9 @@ register_toolchains("@esbuild_toolchains//:all")
 
 ####### Dev dependencies ########
 
-bazel_dep(name = "rules_shell", version = "0.4.1", dev_dependency = True)
-bazel_dep(name = "buildifier_prebuilt", version = "6.4.0", dev_dependency = True)
-bazel_dep(name = "stardoc", version = "0.6.2", dev_dependency = True, repo_name = "io_bazel_stardoc")
+bazel_dep(name = "rules_shell", version = "0.8.0", dev_dependency = True)
+bazel_dep(name = "buildifier_prebuilt", version = "8.5.1.2", dev_dependency = True)
+bazel_dep(name = "stardoc", version = "0.8.1", dev_dependency = True, repo_name = "io_bazel_stardoc")
 
 # Node versions for testing
 node_dev = use_extension(
@@ -38,28 +38,29 @@ node_dev = use_extension(
     "node",
     dev_dependency = True,
 )
-use_repo(node_dev, "node18_linux_amd64")
-use_repo(node_dev, "node18_darwin_arm64")
-use_repo(node_dev, "node18_darwin_amd64")
-use_repo(node_dev, "node18_linux_arm64")
-use_repo(node_dev, "node18_linux_s390x")
-use_repo(node_dev, "node18_linux_ppc64le")
-use_repo(node_dev, "node18_windows_amd64")
-use_repo(node_dev, "node16_linux_amd64")
-use_repo(node_dev, "node16_darwin_arm64")
-use_repo(node_dev, "node16_darwin_amd64")
-use_repo(node_dev, "node16_linux_arm64")
-use_repo(node_dev, "node16_linux_s390x")
-use_repo(node_dev, "node16_linux_ppc64le")
-use_repo(node_dev, "node16_windows_amd64")
-node_dev.toolchain(node_version = "16.14.2")
+use_repo(node_dev, "node22_linux_amd64")
+use_repo(node_dev, "node22_darwin_arm64")
+use_repo(node_dev, "node22_darwin_amd64")
+use_repo(node_dev, "node22_linux_arm64")
+use_repo(node_dev, "node22_linux_s390x")
+use_repo(node_dev, "node22_linux_ppc64le")
+use_repo(node_dev, "node22_windows_amd64")
+use_repo(node_dev, "node24_linux_amd64")
+use_repo(node_dev, "node24_darwin_arm64")
+use_repo(node_dev, "node24_darwin_amd64")
+use_repo(node_dev, "node24_linux_arm64")
+use_repo(node_dev, "node24_linux_s390x")
+use_repo(node_dev, "node24_linux_ppc64le")
+use_repo(node_dev, "node24_windows_amd64")
+
+node_dev.toolchain(node_version = "22.22.0")
 node_dev.toolchain(
-    name = "node16",
-    node_version = "16.9.0",
+    name = "node22",
+    node_version = "22.22.0",
 )
 node_dev.toolchain(
-    name = "node18",
-    node_version = "18.14.2",
+    name = "node24",
+    node_version = "24.13.0",
 )
 
 # Install additional packages to test esbuild plugins
