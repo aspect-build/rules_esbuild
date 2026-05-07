@@ -21,20 +21,23 @@ Run `aspect configure` to keep them up-to-date.
 
 ## Using this as a development dependency of other rules
 
-You'll commonly find that you develop in another WORKSPACE, such as
+You'll commonly find that you develop in another module, such as
 some other ruleset that depends on rules_esbuild, or in a nested
-WORKSPACE in the integration_tests folder.
+module in the `e2e/` folder.
 
-To always tell Bazel to use this directory rather than some release
-artifact or a version fetched from the internet, run this from this
-directory:
+To tell Bazel to use this directory rather than a released artifact
+or a version fetched from the registry, add a `local_path_override` to
+the consumer's `MODULE.bazel`:
 
-```sh
-OVERRIDE="--override_repository=rules_esbuild=$(pwd)/rules_esbuild"
-echo "common $OVERRIDE" >> ~/.bazelrc
+```starlark
+bazel_dep(name = "aspect_rules_esbuild", version = "0.0.0")
+local_path_override(
+    module_name = "aspect_rules_esbuild",
+    path = "/path/to/rules_esbuild",
+)
 ```
 
-This means that any usage of `@rules_esbuild` on your system will point to this folder.
+The `e2e/*/MODULE.bazel` files in this repo demonstrate this pattern.
 
 ## Releasing
 

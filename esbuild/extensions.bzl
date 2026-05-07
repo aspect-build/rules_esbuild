@@ -46,7 +46,6 @@ def _toolchain_extension(module_ctx):
             name = name,
             esbuild_version = esbuild_version,
             integrity = integrity_overrides.get(esbuild_version, None),
-            register = False,
         )
 
 esbuild = module_extension(

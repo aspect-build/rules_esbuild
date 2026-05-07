@@ -15,5 +15,3 @@ buildifier(
     mode = "diff",
     tags = ["manual"],  # tag as manual so windows ci does not build it by default
 )
-
-# gazelle:exclude internal_deps.bzl

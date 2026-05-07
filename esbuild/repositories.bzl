@@ -101,22 +101,19 @@ esbuild_repositories = repository_rule(
 )
 
 # Wrapper macro around everything above, this is the primary API
-def esbuild_register_toolchains(name, esbuild_version, integrity = {}, register = True, **kwargs):
+def esbuild_register_toolchains(name, esbuild_version, integrity = {}, **kwargs):
     """Convenience macro for users which does typical setup.
 
     - create a repository for each built-in platform like "esbuild_linux-64" -
       this repository is lazily fetched when node is needed for that platform.
     - TODO: create a convenience repository for the host platform like "esbuild_host"
     - create a repository exposing toolchains for each platform like "esbuild_platforms"
-    - register a toolchain pointing at each platform
     Users can avoid this macro and do these steps themselves, if they want more control.
 
     Args:
         name: base name for all created repos, like "esbuild0_14"
         esbuild_version: a supported version like "0.14.36"
         integrity: optional dict mapping platform strings to integrity hashes
-        register: whether to call through to native.register_toolchains.
-            Should be True for WORKSPACE users, but false when used under bzlmod extension
         **kwargs: passed to each node_repositories call
     """
     for platform in get_platforms(esbuild_version).keys():
@@ -127,8 +124,6 @@ def esbuild_register_toolchains(name, esbuild_version, integrity = {}, register 
             platform = platform,
             **kwargs
         )
-        if register:
-            native.register_toolchains("@%s_toolchains//:%s_toolchain" % (name, platform))
 
     toolchains_repo(
         name = name + "_toolchains",
