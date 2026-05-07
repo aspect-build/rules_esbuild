@@ -9,9 +9,9 @@ module(
 # Lower-bounds (minimum) versions for direct runtime dependencies
 bazel_dep(name = "bazel_lib", version = "3.0.0")
 bazel_dep(name = "aspect_rules_js", version = "3.0.3")
-bazel_dep(name = "aspect_tools_telemetry", version = "0.2.6")
+bazel_dep(name = "aspect_tools_telemetry", version = "0.3.3")
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
-bazel_dep(name = "platforms", version = "0.0.8")
+bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_nodejs", version = "6.5.0")
 
 tel = use_extension("@aspect_tools_telemetry//:extension.bzl", "telemetry")

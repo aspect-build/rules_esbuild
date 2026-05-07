@@ -14,15 +14,18 @@ _Need help?_ This ruleset has support provided by https://aspect.build/services.
 
 ## Installation
 
-From the release you wish to use:
-<https://github.com/aspect-build/rules_esbuild/releases>
-copy the WORKSPACE snippet into your `WORKSPACE` file.
+Add to your `MODULE.bazel`:
+
+```starlark
+bazel_dep(name = "aspect_rules_esbuild", version = "x.y.z")
+```
+
+See the [Bazel Central Registry](https://registry.bazel.build/modules/aspect_rules_esbuild) for the latest version and the full setup snippet.
 
 ## Usage
 
 See the [API documentation](https://registry.bazel.build/docs/aspect_rules_esbuild),
 and the example usage in the [`examples/`](https://github.com/aspect-build/rules_esbuild/tree/main/examples/) directory.
-Note that the examples rely on code in the `/WORKSPACE` file in the root of this repo.
 
 ## From a BUILD file
 
@@ -61,6 +64,6 @@ You'll need these things:
    that target from step 2 as its `toolchain` and
    `@aspect_rules_esbuild//esbuild:toolchain_type` as its `toolchain_type`.
 4. A call to [the `register_toolchains` function](https://bazel.build/rules/lib/globals#register_toolchains)
-   in your `WORKSPACE` that refers to the `toolchain` rule defined in step 3.
+   in your `MODULE.bazel` that refers to the `toolchain` rule defined in step 3.
 
 See e2e/toolchain_from_source for a complete example.
