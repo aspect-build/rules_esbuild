@@ -15,6 +15,8 @@ jobs:
           ./scripts/mirror_release.sh
           npx @bazel/buildifier esbuild/private/versions.bzl
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: 'chore: mirror external releases'
+          author: "aspect-marvin <marvin@aspect.build>"
+          committer: "aspect-marvin <marvin@aspect.build>"
