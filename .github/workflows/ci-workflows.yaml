@@ -12,9 +12,6 @@ permissions:
 
 env:
     ASPECT_API_TOKEN: ${{ secrets.ASPECT_API_TOKEN }}
-    # The aspect launcher calls the api.github.com releases endpoint to resolve
-    # which aspect-cli to fetch; authenticate that call to dodge the 60/hr
-    # anonymous rate limit on shared CI egress IPs.
     GITHUB_TOKEN: ${{ github.token }}
     # Pin the version of aspect-launcher to install to avoid GitHub API rate limiting from `latest` lookups in CI.
     INSTALL_ASPECT_LAUNCHER_VERSION: 2026.21.30
@@ -36,7 +33,7 @@ jobs:
                 external-cache: true
             - name: Buildifier
               run: |
-                GITHUB_TOKEN=${{ github.token }} curl -fsSL https://install.aspect.build | bash -s -- "$INSTALL_ASPECT_LAUNCHER_VERSION"
+                curl -fsSL https://install.aspect.build | bash -s -- "$INSTALL_ASPECT_LAUNCHER_VERSION"
                 aspect buildifier --task-key=buildifier
     test:
         name: test (${{ matrix.workspace.path }}, ${{ matrix.bazel.id }})
