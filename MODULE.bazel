@@ -30,6 +30,7 @@ register_toolchains("@esbuild_toolchains//:all")
 
 bazel_dep(name = "rules_shell", version = "0.8.0", dev_dependency = True)
 bazel_dep(name = "buildifier_prebuilt", version = "8.5.1.2", dev_dependency = True)
+bazel_dep(name = "aspect_rules_lint", version = "1.13.0", dev_dependency = True)
 bazel_dep(name = "stardoc", version = "0.8.1", dev_dependency = True, repo_name = "io_bazel_stardoc")
 
 # Node versions for testing

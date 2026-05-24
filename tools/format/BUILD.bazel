@@ -1,0 +1,14 @@
+"""BUILD definition for the formatter binary.
+
+This is in its own package because it has many loading-time symbols we don't
+want to trigger for builds that don't run format.
+"""
+
+load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
+
+package(default_visibility = ["//:__subpackages__"])
+
+format_multirun(
+    name = "buildifier",
+    starlark = "@buildifier_prebuilt//:buildifier",
+)
