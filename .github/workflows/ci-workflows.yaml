@@ -12,6 +12,10 @@ permissions:
 
 env:
     ASPECT_API_TOKEN: ${{ secrets.ASPECT_API_TOKEN }}
+    # The aspect launcher calls the api.github.com releases endpoint to resolve
+    # which aspect-cli to fetch; authenticate that call to dodge the 60/hr
+    # anonymous rate limit on shared CI egress IPs.
+    GITHUB_TOKEN: ${{ github.token }}
     # Pin the version of aspect-launcher to install to avoid GitHub API rate limiting from `latest` lookups in CI.
     INSTALL_ASPECT_LAUNCHER_VERSION: 2026.21.30
 
@@ -66,5 +70,5 @@ jobs:
             - name: Test
               working-directory: ${{ matrix.workspace.path }}
               run: |
-                GITHUB_TOKEN=${{ github.token }} curl -fsSL https://install.aspect.build | bash -s -- "$INSTALL_ASPECT_LAUNCHER_VERSION"
+                curl -fsSL https://install.aspect.build | bash -s -- "$INSTALL_ASPECT_LAUNCHER_VERSION"
                 aspect test --task-key=test-${{ matrix.workspace.slug }}-${{ matrix.bazel.id }} ${{ matrix.bazel.flags }} -- //...
