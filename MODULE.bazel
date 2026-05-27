@@ -30,13 +30,8 @@ register_toolchains("@esbuild_toolchains//:all")
 
 bazel_dep(name = "rules_shell", version = "0.8.0", dev_dependency = True)
 bazel_dep(name = "buildifier_prebuilt", version = "8.5.1.2", dev_dependency = True)
-bazel_dep(name = "aspect_rules_lint", version = "1.13.0", dev_dependency = True)
 bazel_dep(name = "stardoc", version = "0.8.1", dev_dependency = True, repo_name = "io_bazel_stardoc")
 
-# aspect_rules_lint transitively pulls in rules_go 0.42.0, which references
-# the legacy global `CcInfo` symbol that Bazel 9 removed. Pin to a current
-# rules_go that loads CcInfo from `@rules_cc//cc/common:cc_info.bzl`.
-bazel_dep(name = "rules_go", version = "0.60.0", dev_dependency = True)
 
 # Node versions for testing
 node_dev = use_extension(
