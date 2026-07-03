@@ -417,6 +417,7 @@ def _esbuild_impl(ctx):
         env = env,
         use_default_shell_env = True,
         executable = launcher,
+        toolchain = None,
     )
 
     output_sources_depset = depset(output_sources)
