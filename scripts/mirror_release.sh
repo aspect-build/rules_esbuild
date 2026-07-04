@@ -8,7 +8,7 @@ VERSIONS_BZL="$SCRIPT_DIR/../esbuild/private/versions.bzl"
 
 # Gather integrity hashes for the most recent release
 PKGS=""
-for pkg in darwin-{x,arm}64 linux-{x,arm}64 win32-x64; do
+for pkg in darwin-{x,arm}64 linux-{x,arm}64 win32-{x,arm}64; do
     PKGS="$PKGS        \"$pkg\": $(curl --silent "https://registry.npmjs.org/@esbuild/${pkg}/latest" | jq ".dist.integrity"),"
 done
 # Remove final trailing comma so it's valid JSON
