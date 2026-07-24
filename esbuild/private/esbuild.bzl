@@ -364,11 +364,13 @@ def _esbuild_impl(ctx):
     other_inputs.append(args_file)
     launcher_args.add("--esbuild_args=%s" % _bin_relative_path(ctx, args_file))
 
+    output_groups = {}
     if ctx.attr.metafile:
         # add metafile
         meta_file = ctx.actions.declare_file("%s_metadata.json" % ctx.attr.name)
         output_sources.append(meta_file)
         launcher_args.add("--metafile=%s" % _bin_relative_path(ctx, meta_file))
+        output_groups["metafile"] = depset([meta_file])
 
     # add reference to the users args file, these are merged within the launcher
     if ctx.attr.args_file:
@@ -481,6 +483,7 @@ def _esbuild_impl(ctx):
             npm_sources = npm_sources,
             npm_package_store_infos = npm_package_store_infos,
         ),
+        OutputGroupInfo(**output_groups),
     ]
 
 lib = struct(
