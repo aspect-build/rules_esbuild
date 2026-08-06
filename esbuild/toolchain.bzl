@@ -6,10 +6,7 @@ load("//esbuild/private:helpers.bzl", "launcher_kind_aspect")
 EsbuildInfo = provider(
     doc = "Information about how to invoke the tool executable.",
     fields = {
-        "launcher": """Bazel-specific wrapper binary that starts up esbuild.
-
-launcher_kind_aspect (esbuild/private/helpers.bzl) is attached to this attribute, so callers
-can check `launcher[LauncherKindInfo].is_js_binary` to see whether it's a js_binary.""",
+        "launcher": "Bazel-specific wrapper binary that starts up esbuild",
         "target_tool_path": "Path to the tool executable for the target platform.",
         "tool_files": """Files required in runfiles to make the tool executable available.
 
