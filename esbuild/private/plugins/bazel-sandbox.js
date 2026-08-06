@@ -12,7 +12,11 @@ const execroot = process.env.JS_BINARY__EXECROOT
 // node resolves it to a real absolute path, that path always contains the *real* bindir segment,
 // never the mapped one. The path is then reconstructed using `bindir` (see below), since that's
 // the name the mapped sandbox's own directory tree actually uses on disk for this action.
-const BAZEL_OUT_BINDIR_RE = /bazel-out\/[^/]+\/bin\//
+//
+// Matches both `/` and `\` as separators: BAZEL_BINDIR (from Bazel's Starlark-internal path
+// representation) is always forward-slash, but a real resolved path on native Windows uses
+// backslashes (see the startsWith('\\') check below for the same reason).
+const BAZEL_OUT_BINDIR_RE = /bazel-out[\\/][^\\/]+[\\/]bin[\\/]/
 
 // Under Bazel, esbuild will follow symlinks out of the sandbox when the sandbox is enabled. See https://github.com/aspect-build/rules_esbuild/issues/58.
 // This plugin using a separate resolver to detect if the the resolution has left the execroot (which is the root of the sandbox
