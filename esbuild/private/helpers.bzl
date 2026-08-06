@@ -16,8 +16,7 @@ LauncherKindInfo = provider(
 def _launcher_kind_aspect_impl(target, ctx):
     return [LauncherKindInfo(is_js_binary = ctx.rule.kind == "js_binary")]
 
-# Detects whether a launcher target is a js_binary, so that esbuild_toolchain() and
-# esbuild_bundle()'s launcher attributes don't need callers to say so explicitly.
+# Detects whether a launcher target is a js_binary.
 launcher_kind_aspect = aspect(
     implementation = _launcher_kind_aspect_impl,
 )

@@ -420,8 +420,7 @@ def _esbuild_impl(ctx):
     progress_message = "%s Javascript %s [esbuild]" % ("Bundling" if not ctx.attr.output_dir else "Splitting", " ".join([_bin_relative_path(ctx, entry_point) for entry_point in entry_points]))
 
     if launcher_is_js_binary:
-        # run_binary_action() passes BAZEL_BINDIR to the js_binary launcher via a
-        # path-mapping-friendly command-line flag rather than a literal env var.
+        # run_binary_action() invokes the js_binary launcher in a path-mapping-friendly way.
         js_binary_lib.run_binary_action(
             ctx,
             inputs = input_sources,
@@ -435,9 +434,8 @@ def _esbuild_impl(ctx):
             executable = launcher_files_to_run,
         )
     else:
-        # The launcher is not known to be a js_binary, so it may not understand
-        # run_binary_action()'s command-line flag. Fall back to a plain env var, which is not
-        # path-mapping-friendly.
+        # The launcher is not a js_binary, so we must explicitly set the BAZEL_BINDIR environment
+        # variable, which is not path-mapping-friendly.
         env["BAZEL_BINDIR"] = ctx.bin_dir.path
         ctx.actions.run(
             inputs = input_sources,
@@ -454,7 +452,7 @@ def _esbuild_impl(ctx):
     output_sources_depset = depset(output_sources)
 
     if ctx.attr.bundle:
-        # When bundling don't propogate any transitive sources or declarations since sources
+        # When bundling don't propagate any transitive sources or declarations since sources
         # are typically bundled into the output.
         transitive_sources = output_sources_depset
         transitive_types = depset()
