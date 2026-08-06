@@ -5,6 +5,15 @@ local_path_override(
 )
 
 bazel_dep(name = "aspect_rules_js", version = "3.0.3", dev_dependency = True)
+
+# TODO: remove once a release of aspect_rules_js contains
+# js_binary_lib.run_binary_action() and the aspect_rules_js bazel_dep versions
+# above and in aspect_rules_esbuild's MODULE.bazel are bumped to that release.
+git_override(
+    module_name = "aspect_rules_js",
+    remote = "https://github.com/aspect-build/rules_js.git",
+    commit = "bf35bc0e47a58cef222c93c1c80b5f38faeed04c",
+)
 bazel_dep(name = "bazel_skylib", version = "1.5.0", dev_dependency = True)
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependency = True)

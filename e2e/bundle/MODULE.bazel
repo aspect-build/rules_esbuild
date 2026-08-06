@@ -4,4 +4,13 @@ local_path_override(
     path = "../..",
 )
 
+# TODO: remove once a release of aspect_rules_js contains
+# js_binary_lib.run_binary_action() and aspect_rules_esbuild's MODULE.bazel
+# bumps its aspect_rules_js bazel_dep version to that release.
+git_override(
+    module_name = "aspect_rules_js",
+    remote = "https://github.com/aspect-build/rules_js.git",
+    commit = "bf35bc0e47a58cef222c93c1c80b5f38faeed04c",
+)
+
 bazel_dep(name = "bazel_lib", version = "3.0.0", dev_dependency = True)

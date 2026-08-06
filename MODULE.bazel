@@ -14,6 +14,17 @@ bazel_dep(name = "bazel_skylib", version = "1.8.2")
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_nodejs", version = "6.5.0")
 
+# TODO: remove this override once a release of aspect_rules_js contains
+# js_binary_lib.run_binary_action() (merged to main in
+# https://github.com/aspect-build/rules_js/pull/2963, not yet released as of
+# aspect_rules_js 3.3.1), and bump the aspect_rules_js bazel_dep version above
+# to that release.
+git_override(
+    module_name = "aspect_rules_js",
+    remote = "https://github.com/aspect-build/rules_js.git",
+    commit = "bf35bc0e47a58cef222c93c1c80b5f38faeed04c",
+)
+
 tel = use_extension("@aspect_tools_telemetry//:extension.bzl", "telemetry")
 use_repo(tel, "aspect_tools_telemetry_report")
 

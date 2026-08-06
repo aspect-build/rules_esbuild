@@ -1,3 +1,5 @@
+module(name = "e2e_path_mapping")
+
 bazel_dep(name = "aspect_rules_esbuild", version = "0.0.0", dev_dependency = True)
 local_path_override(
     module_name = "aspect_rules_esbuild",
@@ -13,4 +15,5 @@ git_override(
     commit = "bf35bc0e47a58cef222c93c1c80b5f38faeed04c",
 )
 
+bazel_dep(name = "bazel_lib", version = "3.0.0", dev_dependency = True)
 bazel_dep(name = "bazel_skylib", version = "1.5.0", dev_dependency = True)

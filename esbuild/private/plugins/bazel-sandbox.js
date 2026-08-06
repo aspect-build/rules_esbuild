@@ -4,6 +4,16 @@ const process = require('process')
 const bindir = process.env.BAZEL_BINDIR
 const execroot = process.env.JS_BINARY__EXECROOT
 
+// Matches the bazel-out/<config>/bin segment of an absolute path. Used to detect and strip a
+// bindir prefix instead of matching BAZEL_BINDIR exactly, because under Bazel's path-mapping
+// feature BAZEL_BINDIR may hold a generic mapped placeholder (e.g. "bazel-out/cfg/bin") for
+// cache-sharing purposes, rather than the real per-config value (e.g.
+// "bazel-out/k8-fastbuild/bin") -- but once esbuild follows a symlink out of the sandbox and
+// node resolves it to a real absolute path, that path always contains the *real* bindir segment,
+// never the mapped one. The path is then reconstructed using `bindir` (see below), since that's
+// the name the mapped sandbox's own directory tree actually uses on disk for this action.
+const BAZEL_OUT_BINDIR_RE = /bazel-out\/[^/]+\/bin\//
+
 // Under Bazel, esbuild will follow symlinks out of the sandbox when the sandbox is enabled. See https://github.com/aspect-build/rules_esbuild/issues/58.
 // This plugin using a separate resolver to detect if the the resolution has left the execroot (which is the root of the sandbox
 // when sandboxing is enabled) and patches the resolution back into the sandbox.
@@ -78,16 +88,18 @@ function correctImportPath(result, otherOptions, firstEntry) {
     }
 
     // If it tried to leave bazel-bin, error out completely.
-    if (!result.path.includes(bindir)) {
+    const bindirMatch = BAZEL_OUT_BINDIR_RE.exec(result.path)
+    if (!bindirMatch) {
       throw new Error(
-        `Error: esbuild resolved a path outside of BAZEL_BINDIR (${bindir}): ${result.path}`
+        `Error: esbuild resolved a path outside of bazel-out/*/bin: ${result.path}`
       )
     }
-    // Otherwise remap the bindir-relative path
-    const correctedPath = path.join(
-      execroot,
-      result.path.substring(result.path.indexOf(bindir))
+    // Otherwise remap the bindir-relative path, reconstructed under this action's actual
+    // (possibly path-mapped) bindir rather than the real one baked into `result.path`.
+    const relativeToBindir = result.path.substring(
+      bindirMatch.index + bindirMatch[0].length
     )
+    const correctedPath = path.join(execroot, bindir, relativeToBindir)
     if (!!process.env.JS_BINARY__LOG_DEBUG) {
       console.error(
         `DEBUG: [bazel-sandbox] correcting esbuild resolution ${result.path} that left the sandbox to ${correctedPath}.`
