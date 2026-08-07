@@ -6,6 +6,21 @@ TS_EXTENSIONS = ["ts", "tsx"]
 JS_EXTENSIONS = ["js", "jsx", "mjs"]
 ALLOWED_EXTENSIONS = JS_EXTENSIONS + TS_EXTENSIONS
 
+LauncherKindInfo = provider(
+    doc = "Internal use only. Reports the rule kind of a launcher target.",
+    fields = {
+        "is_js_binary": "True if the target's underlying rule is js_binary.",
+    },
+)
+
+def _launcher_kind_aspect_impl(target, ctx):
+    return [LauncherKindInfo(is_js_binary = ctx.rule.kind == "js_binary")]
+
+# Detects whether a launcher target is a js_binary.
+launcher_kind_aspect = aspect(
+    implementation = _launcher_kind_aspect_impl,
+)
+
 def desugar_entry_point_names(entry_point, entry_points):
     """Users can specify entry_point (sugar) or entry_points (long form).
 

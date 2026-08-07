@@ -1,6 +1,8 @@
 """This module implements the language-specific toolchain rule.
 """
 
+load("//esbuild/private:helpers.bzl", "launcher_kind_aspect")
+
 EsbuildInfo = provider(
     doc = "Information about how to invoke the tool executable.",
     fields = {
@@ -68,6 +70,7 @@ esbuild_toolchain = rule(
             mandatory = True,
             executable = True,
             cfg = "exec",
+            aspects = [launcher_kind_aspect],
         ),
         "target_tool": attr.label(
             doc = "A hermetically downloaded executable target for the target platform.",

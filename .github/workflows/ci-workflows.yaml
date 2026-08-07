@@ -36,6 +36,7 @@ jobs:
                 - { path: "e2e/bundle", slug: "e2e-bundle" }
                 - { path: "e2e/custom_version", slug: "e2e-custom_version" }
                 - { path: "e2e/npm-links", slug: "e2e-npm-links" }
+                - { path: "e2e/path_mapping", slug: "e2e-path_mapping" }
                 - { path: "e2e/sourcemaps", slug: "e2e-sourcemaps" }
                 - { path: "e2e/toolchain_from_source", slug: "e2e-toolchain_from_source" }
                 - { path: "e2e/tsconfig", slug: "e2e-tsconfig" }
@@ -53,3 +54,11 @@ jobs:
             - name: Test
               working-directory: ${{ matrix.workspace.path }}
               run: aspect test --task-key=test-${{ matrix.workspace.slug }}-${{ matrix.bazel.id }} ${{ matrix.bazel.flags }} -- //...
+            - name: Optional ./test.sh
+              working-directory: ${{ matrix.workspace.path }}
+              run: |
+                  if [[ -f ./test.sh ]]; then
+                      ./test.sh
+                  else
+                      echo "No test.sh in ${PWD}; skipping"
+                  fi

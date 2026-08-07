@@ -30,6 +30,7 @@ jobs:
           - 'e2e/smoke'
           - 'e2e/custom_version'
           - 'e2e/npm-links'
+          - 'e2e/path_mapping'
           - 'e2e/sourcemaps'
           - 'e2e/toolchain_from_source'
           - 'e2e/tsconfig'
@@ -41,3 +42,12 @@ jobs:
       - run: bazel test //...
         working-directory: ${{ matrix.folder }}
         shell: bash
+      - name: Optional ./test.sh
+        working-directory: ${{ matrix.folder }}
+        shell: bash
+        run: |
+          if [[ -f ./test.sh ]]; then
+              ./test.sh
+          else
+              echo "No test.sh in ${PWD}; skipping"
+          fi

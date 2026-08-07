@@ -1,10 +1,10 @@
 "# esbuild rule"
 
-load("@aspect_rules_js//js:libs.bzl", "js_lib_constants", "js_lib_helpers")
+load("@aspect_rules_js//js:libs.bzl", "js_binary_lib", "js_lib_constants", "js_lib_helpers")
 load("@aspect_rules_js//js:providers.bzl", "JsInfo", "js_info")
 load("@bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_file_to_bin_action", "copy_files_to_bin_actions")
 load("@bazel_lib//lib:expand_make_vars.bzl", "expand_variables")
-load(":helpers.bzl", "desugar_entry_point_names", "write_args_file")
+load(":helpers.bzl", "LauncherKindInfo", "desugar_entry_point_names", "launcher_kind_aspect", "write_args_file")
 
 _ATTRS = {
     "args_file": attr.label(
@@ -76,6 +76,7 @@ See https://esbuild.github.io/api/#format for more details
         executable = True,
         doc = "Override the default esbuild wrapper, which is supplied by the esbuild toolchain",
         cfg = "exec",
+        aspects = [launcher_kind_aspect],
     ),
     "max_threads": attr.int(
         mandatory = False,
@@ -256,15 +257,17 @@ def _esbuild_impl(ctx):
     entry_points_bin_copy = copy_files_to_bin_actions(ctx, entry_points)
     tsconfig_bin_copy = copy_file_to_bin_action(ctx, ctx.file.tsconfig)
 
+    can_path_map = True
+    define = {}
+    for k, v in ctx.attr.define.items():
+        expanded_v = expand_variables(ctx, ctx.expand_location(v), attribute_name = "define")
+        if expanded_v != v:
+            can_path_map = False
+        define[k] = expanded_v
+
     args = dict({
         "bundle": ctx.attr.bundle,
-        "define": dict([
-            [
-                k,
-                expand_variables(ctx, ctx.expand_location(v), attribute_name = "define"),
-            ]
-            for k, v in ctx.attr.define.items()
-        ]),
+        "define": define,
         "entryPoints": [_bin_relative_path(ctx, entry_point) for entry_point in entry_points_bin_copy],
         "external": ctx.attr.external,
         "logLevel": ctx.attr.esbuild_log_level,
@@ -338,7 +341,6 @@ def _esbuild_impl(ctx):
         output_sources.append(extra_dir)
 
     env = {
-        "BAZEL_BINDIR": ctx.bin_dir.path,
         "ESBUILD_BINARY_PATH": esbuild_toolinfo.target_tool_path,
     }
 
@@ -351,9 +353,18 @@ def _esbuild_impl(ctx):
     for log_level_env in js_lib_helpers.envs_for_log_level(ctx.attr.js_log_level):
         env[log_level_env] = "1"
 
+    if ctx.executable.launcher:
+        launcher_files_to_run = ctx.attr.launcher[DefaultInfo].files_to_run
+        launcher_is_js_binary = ctx.attr.launcher[LauncherKindInfo].is_js_binary
+    else:
+        launcher_files_to_run = esbuild_toolinfo.launcher.files_to_run
+        launcher_is_js_binary = esbuild_toolinfo.launcher[LauncherKindInfo].is_js_binary
+
     execution_requirements = {}
     if "no-remote-exec" in ctx.attr.tags:
-        execution_requirements = {"no-remote-exec": "1"}
+        execution_requirements["no-remote-exec"] = "1"
+    if can_path_map and launcher_is_js_binary:
+        execution_requirements["supports-path-mapping"] = "1"
 
     # setup the args passed to the launcher
     launcher_args = ctx.actions.args()
@@ -408,23 +419,42 @@ def _esbuild_impl(ctx):
         )],
     )
 
-    launcher = ctx.executable.launcher or esbuild_toolinfo.launcher.files_to_run
-    ctx.actions.run(
-        inputs = input_sources,
-        outputs = output_sources,
-        arguments = [launcher_args],
-        progress_message = "%s Javascript %s [esbuild]" % ("Bundling" if not ctx.attr.output_dir else "Splitting", " ".join([_bin_relative_path(ctx, entry_point) for entry_point in entry_points])),
-        execution_requirements = execution_requirements,
-        mnemonic = "esbuild",
-        env = env,
-        use_default_shell_env = True,
-        executable = launcher,
-    )
+    progress_message = "%s Javascript %s [esbuild]" % ("Bundling" if not ctx.attr.output_dir else "Splitting", " ".join([_bin_relative_path(ctx, entry_point) for entry_point in entry_points]))
+
+    if launcher_is_js_binary:
+        # run_binary_action() invokes the js_binary launcher in a path-mapping-friendly way.
+        js_binary_lib.run_binary_action(
+            ctx,
+            inputs = input_sources,
+            outputs = output_sources,
+            arguments = [launcher_args],
+            progress_message = progress_message,
+            execution_requirements = execution_requirements,
+            mnemonic = "esbuild",
+            env = env,
+            use_default_shell_env = True,
+            executable = launcher_files_to_run,
+        )
+    else:
+        # The launcher is not a js_binary, so we must explicitly set the BAZEL_BINDIR environment
+        # variable, which is not path-mapping-friendly.
+        env["BAZEL_BINDIR"] = ctx.bin_dir.path
+        ctx.actions.run(
+            inputs = input_sources,
+            outputs = output_sources,
+            arguments = [launcher_args],
+            progress_message = progress_message,
+            execution_requirements = execution_requirements,
+            mnemonic = "esbuild",
+            env = env,
+            use_default_shell_env = True,
+            executable = ctx.executable.launcher or launcher_files_to_run,
+        )
 
     output_sources_depset = depset(output_sources)
 
     if ctx.attr.bundle:
-        # When bundling don't propogate any transitive sources or declarations since sources
+        # When bundling don't propagate any transitive sources or declarations since sources
         # are typically bundled into the output.
         transitive_sources = output_sources_depset
         transitive_types = depset()
