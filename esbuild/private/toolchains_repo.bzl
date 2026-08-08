@@ -52,6 +52,12 @@ _PLATFORMS = {
             "@platforms//cpu:x86_64",
         ],
     ),
+    "win32-arm64": struct(
+        compatible_with = [
+            "@platforms//os:windows",
+            "@platforms//cpu:aarch64",
+        ],
+    ),
 }
 
 def get_platforms(version):
