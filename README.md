@@ -28,7 +28,7 @@ See the [Bazel Central Registry](https://registry.bazel.build/modules/aspect_rul
 
 ## Usage
 
-See the [API documentation](https://registry.bazel.build/docs/aspect_rules_esbuild),
+See the [API documentation](https://registry.bazel.build/modules/aspect_rules_esbuild/latest/docs),
 and the example usage in the [`examples/`](https://github.com/aspect-build/rules_esbuild/tree/main/examples/) directory.
 
 ## From a BUILD file
