@@ -18,6 +18,13 @@ set -o errexit -o nounset -o pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
+# Forward any arguments given to this script to every bazel invocation below.
+# They go right after the command, so that each invocation's own flags win.
+script_args=("$@")
+bazel() {
+    command bazel "$1" "${script_args[@]}" "${@:2}"
+}
+
 scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
 disk_cache="$scratch/disk_cache"
@@ -36,9 +43,12 @@ bazel build -c fastbuild //:bundle \
     --disk_cache="$disk_cache" \
     --action_env="ESBUILD_PATH_MAPPING_TEST_INVALIDATE=$invalidate"
 
+# Bazel accepts only one execution log, so clear any compact one set by the
+# caller (e.g. by --config=aspect-cloud) before asking for the JSON one.
 bazel build -c opt //:bundle \
     --disk_cache="$disk_cache" \
     --action_env="ESBUILD_PATH_MAPPING_TEST_INVALIDATE=$invalidate" \
+    --execution_log_compact_file= \
     --execution_log_json_file="$exec_log"
 
 matches="$(jq -s '[.[] | select(.mnemonic == "esbuild")]' "$exec_log")"
