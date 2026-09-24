@@ -65,6 +65,7 @@ jobs:
             # test.sh shares the output base of the aspect test run above, whose remote
             # cache hits were never downloaded. It needs the same remote cache to fetch
             # them, or Bazel 7 fails with "Missing digest".
+            # TODO: stop passing $BAZEL_ASPECT_FLAGS here when we drop support for Bazel 7
             - name: Optional ./test.sh
               working-directory: ${{ matrix.workspace.path }}
               run: |
