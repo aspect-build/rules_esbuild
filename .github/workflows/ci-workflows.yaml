@@ -19,6 +19,8 @@ env:
     ASPECT_WORKSPACE: ${{ github.workspace }}
     # Skip the --remote flag on fork PRs, which do not have access to secrets
     REMOTE_FLAG: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && '--remote' || '' }}
+    # The same, for the vanilla bazel calls in test.sh scripts
+    BAZEL_ASPECT_FLAGS: ${{ secrets.ASPECT_OSS_API_TOKEN != '' && '--config=aspect-cloud' || '' }}
 
 jobs:
     buildifier:
@@ -60,11 +62,18 @@ jobs:
             - name: Test
               working-directory: ${{ matrix.workspace.path }}
               run: aspect test $REMOTE_FLAG --task:name=test-${{ matrix.workspace.slug }}-${{ matrix.bazel.id }} ${{ matrix.bazel.flags }} -- //...
+            # test.sh shares the output base of the aspect test run above, whose remote
+            # cache hits were never downloaded. It needs the same remote cache to fetch
+            # them, or Bazel 7 fails with "Missing digest".
+            # TODO: stop passing $BAZEL_ASPECT_FLAGS here when we drop support for Bazel 7
             - name: Optional ./test.sh
               working-directory: ${{ matrix.workspace.path }}
               run: |
                   if [[ -f ./test.sh ]]; then
-                      ./test.sh
+                      # Bazel fails the build rather than create the directory the
+                      # aspect-exec-log group writes into.
+                      mkdir -p .aspect/generated
+                      ./test.sh $BAZEL_ASPECT_FLAGS
                   else
                       echo "No test.sh in ${PWD}; skipping"
                   fi
