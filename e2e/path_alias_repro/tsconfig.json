@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "module": "esnext",
+        "target": "esnext",
+        "moduleResolution": "node",
+        "baseUrl": ".",
+        "declaration": true,
+        "paths": {
+            "esbuild_repro/*": [
+                "./*"
+            ]
+        }
+    }
+}
