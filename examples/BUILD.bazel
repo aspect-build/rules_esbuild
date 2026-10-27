@@ -1,6 +1,7 @@
 load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load(":asserts.bzl", "assert_contains")
 
 esbuild(
     name = "lib",
@@ -18,6 +19,30 @@ esbuild(
 build_test(
     name = "test",
     targets = [":lib"],
+)
+
+filegroup(
+    name = "lib_metafile",
+    srcs = [":lib"],
+    output_group = "metafile",
+)
+
+assert_contains(
+    name = "metafile_has_inputs_test",
+    actual = ":lib_metafile",
+    expected = '"inputs":{',
+)
+
+assert_contains(
+    name = "metafile_has_outputs_test",
+    actual = ":lib_metafile",
+    expected = '"outputs":{',
+)
+
+assert_contains(
+    name = "metafile_references_main_test",
+    actual = ":lib_metafile",
+    expected = "examples/main.js",
 )
 
 sh_test(

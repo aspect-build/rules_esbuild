@@ -1,0 +1,5 @@
+import %workspace%/../bazelrc
+
+# Path mapping:
+# https://bazel.build/reference/command-line-reference#flag--experimental_output_paths
+common --experimental_output_paths=strip
