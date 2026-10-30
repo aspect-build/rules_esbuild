@@ -4,7 +4,7 @@ load("@aspect_rules_js//js:libs.bzl", "js_binary_lib", "js_lib_constants", "js_l
 load("@aspect_rules_js//js:providers.bzl", "JsInfo", "js_info")
 load("@bazel_lib//lib:copy_to_bin.bzl", "COPY_FILE_TO_BIN_TOOLCHAINS", "copy_file_to_bin_action", "copy_files_to_bin_actions")
 load("@bazel_lib//lib:expand_make_vars.bzl", "expand_variables")
-load(":helpers.bzl", "LauncherKindInfo", "desugar_entry_point_names", "launcher_kind_aspect", "write_args_file")
+load(":helpers.bzl", "LauncherKindInfo", "desugar_entry_point_names", "write_args_file")
 
 _ATTRS = {
     "args_file": attr.label(
@@ -71,12 +71,6 @@ and cjs when platform is node. If performing code splitting or multiple entry_po
 
 See https://esbuild.github.io/api/#format for more details
 """,
-    ),
-    "launcher": attr.label(
-        executable = True,
-        doc = "Override the default esbuild wrapper, which is supplied by the esbuild toolchain",
-        cfg = "exec",
-        aspects = [launcher_kind_aspect],
     ),
     "max_threads": attr.int(
         mandatory = False,
@@ -353,15 +347,8 @@ def _esbuild_impl(ctx):
     for log_level_env in js_lib_helpers.envs_for_log_level(ctx.attr.js_log_level):
         env[log_level_env] = "1"
 
-    if ctx.executable.launcher:
-        launcher_files_to_run = ctx.attr.launcher[DefaultInfo].files_to_run
-        launcher_is_js_binary = ctx.attr.launcher[LauncherKindInfo].is_js_binary
-    else:
-        launcher_files_to_run = esbuild_toolinfo.launcher.files_to_run
-        launcher_is_js_binary = esbuild_toolinfo.launcher[LauncherKindInfo].is_js_binary
-
-    # The default launcher comes from the esbuild toolchain, so run on its exec platform.
-    launcher_toolchain = None if ctx.executable.launcher else "@aspect_rules_esbuild//esbuild:toolchain_type"
+    launcher_files_to_run = esbuild_toolinfo.launcher.files_to_run
+    launcher_is_js_binary = esbuild_toolinfo.launcher[LauncherKindInfo].is_js_binary
 
     execution_requirements = {}
     if "no-remote-exec" in ctx.attr.tags:
@@ -424,37 +411,28 @@ def _esbuild_impl(ctx):
 
     progress_message = "%s Javascript %s [esbuild]" % ("Bundling" if not ctx.attr.output_dir else "Splitting", " ".join([_bin_relative_path(ctx, entry_point) for entry_point in entry_points]))
 
-    if launcher_is_js_binary:
-        # run_binary_action() invokes the js_binary launcher in a path-mapping-friendly way.
-        js_binary_lib.run_binary_action(
-            ctx,
-            inputs = input_sources,
-            outputs = output_sources,
-            arguments = [launcher_args],
-            progress_message = progress_message,
-            execution_requirements = execution_requirements,
-            mnemonic = "esbuild",
-            env = env,
-            use_default_shell_env = True,
-            executable = launcher_files_to_run,
-            toolchain = launcher_toolchain,
-        )
-    else:
+    if not launcher_is_js_binary:
         # The launcher is not a js_binary, so we must explicitly set the BAZEL_BINDIR environment
         # variable, which is not path-mapping-friendly.
         env["BAZEL_BINDIR"] = ctx.bin_dir.path
-        ctx.actions.run(
-            inputs = input_sources,
-            outputs = output_sources,
-            arguments = [launcher_args],
-            progress_message = progress_message,
-            execution_requirements = execution_requirements,
-            mnemonic = "esbuild",
-            env = env,
-            use_default_shell_env = True,
-            executable = ctx.executable.launcher or launcher_files_to_run,
-            toolchain = launcher_toolchain,
-        )
+
+    action_kwargs = dict(
+        inputs = input_sources,
+        outputs = output_sources,
+        arguments = [launcher_args],
+        progress_message = progress_message,
+        execution_requirements = execution_requirements,
+        mnemonic = "esbuild",
+        env = env,
+        use_default_shell_env = True,
+        executable = launcher_files_to_run,
+        toolchain = "@aspect_rules_esbuild//esbuild:toolchain_type",
+    )
+    if launcher_is_js_binary:
+        # run_binary_action() invokes the js_binary launcher in a path-mapping-friendly way.
+        js_binary_lib.run_binary_action(ctx, **action_kwargs)
+    else:
+        ctx.actions.run(**action_kwargs)
 
     output_sources_depset = depset(output_sources)
 
