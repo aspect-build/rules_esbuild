@@ -217,14 +217,7 @@ See https://esbuild.github.io/api/#target for more details
         values = js_lib_constants.LOG_LEVELS.keys(),
     ),
     "node_toolchain": attr.label(
-        doc = """The Node.js toolchain to use for this target.
-
-        See https://bazelbuild.github.io/rules_nodejs/Toolchains.html
-
-        Typically this is left unset so that Bazel automatically selects the right Node.js toolchain
-        for the target platform. See https://bazel.build/extending/toolchains#toolchain-resolution
-        for more information.
-        """,
+        doc = """Deprecated and ignored; will be removed in a future major release.""",
     ),
 }
 
@@ -239,12 +232,6 @@ def _bin_relative_path(ctx, file):
     return up + "/" + file.path
 
 def _esbuild_impl(ctx):
-    if ctx.attr.node_toolchain:
-        node_toolchain = ctx.attr.node_toolchain[platform_common.ToolchainInfo]
-    else:
-        node_toolchain = ctx.toolchains["@rules_nodejs//nodejs:toolchain_type"]
-
-    node_toolinfo = node_toolchain.nodeinfo
     esbuild_toolinfo = ctx.toolchains["@aspect_rules_esbuild//esbuild:toolchain_type"].esbuildinfo
 
     entry_points = desugar_entry_point_names(ctx.file.entry_point, ctx.files.entry_points)
@@ -398,7 +385,7 @@ def _esbuild_impl(ctx):
             file
             for file in ctx.files.srcs
             if not (file.path.endswith(".d.ts") or file.path.endswith(".tsbuildinfo"))
-        ]) + entry_points_bin_copy + [tsconfig_bin_copy] + other_inputs + node_toolinfo.tool_files + esbuild_toolinfo.tool_files,
+        ]) + entry_points_bin_copy + [tsconfig_bin_copy] + other_inputs + esbuild_toolinfo.tool_files,
         transitive = [js_lib_helpers.gather_files_from_js_infos(
             targets = ctx.attr.srcs + ctx.attr.deps + config_deps,
             include_sources = True,
@@ -503,7 +490,6 @@ lib = struct(
     attrs = _ATTRS,
     implementation = _esbuild_impl,
     toolchains = [
-        "@rules_nodejs//nodejs:toolchain_type",
         "@aspect_rules_esbuild//esbuild:toolchain_type",
     ] + COPY_FILE_TO_BIN_TOOLCHAINS,
 )
