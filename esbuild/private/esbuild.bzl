@@ -360,6 +360,9 @@ def _esbuild_impl(ctx):
         launcher_files_to_run = esbuild_toolinfo.launcher.files_to_run
         launcher_is_js_binary = esbuild_toolinfo.launcher[LauncherKindInfo].is_js_binary
 
+    # The default launcher comes from the esbuild toolchain, so run on its exec platform.
+    launcher_toolchain = None if ctx.executable.launcher else "@aspect_rules_esbuild//esbuild:toolchain_type"
+
     execution_requirements = {}
     if "no-remote-exec" in ctx.attr.tags:
         execution_requirements["no-remote-exec"] = "1"
@@ -434,7 +437,7 @@ def _esbuild_impl(ctx):
             env = env,
             use_default_shell_env = True,
             executable = launcher_files_to_run,
-            toolchain = None,
+            toolchain = launcher_toolchain,
         )
     else:
         # The launcher is not a js_binary, so we must explicitly set the BAZEL_BINDIR environment
@@ -450,7 +453,7 @@ def _esbuild_impl(ctx):
             env = env,
             use_default_shell_env = True,
             executable = ctx.executable.launcher or launcher_files_to_run,
-            toolchain = None,
+            toolchain = launcher_toolchain,
         )
 
     output_sources_depset = depset(output_sources)
