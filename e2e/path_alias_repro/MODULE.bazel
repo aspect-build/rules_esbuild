@@ -1,0 +1,23 @@
+module(
+    name = "esbuild_repro",
+    version = "0.0.0",
+)
+
+bazel_dep(name = "aspect_rules_esbuild", version = "0.0.0", dev_dependency = True)
+local_path_override(
+    module_name = "aspect_rules_esbuild",
+    path = "../..",
+)
+
+bazel_dep(name = "aspect_rules_ts", version = "3.3.2")
+bazel_dep(name = "aspect_rules_js", version = "2.1.0")
+
+rules_ts_ext = use_extension("@aspect_rules_ts//ts:extensions.bzl", "ext")
+rules_ts_ext.deps()
+use_repo(rules_ts_ext, "npm_typescript")
+
+rules_esbuild_ext = use_extension("@aspect_rules_esbuild//esbuild:extensions.bzl", "esbuild")
+rules_esbuild_ext.toolchain(esbuild_version = "0.23.0")
+use_repo(rules_esbuild_ext, "esbuild_toolchains")
+
+register_toolchains("@esbuild_toolchains//:all")

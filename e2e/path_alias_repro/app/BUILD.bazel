@@ -1,0 +1,21 @@
+load("@aspect_rules_esbuild//esbuild:defs.bzl", "esbuild")
+load("@aspect_rules_ts//ts:defs.bzl", "ts_project")
+
+ts_project(
+    name = "lib",
+    srcs = ["index.ts"],
+    declaration = True,
+    transpiler = "tsc",
+    tsconfig = "//:tsconfig",
+    deps = ["//lib"],
+)
+
+esbuild(
+    name = "bundle",
+    srcs = [":lib"],
+    bundle = True,
+    entry_point = "index.js",
+    minify = True,
+    tsconfig = "//:tsconfig",
+    deps = ["//lib"],
+)
