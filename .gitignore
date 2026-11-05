@@ -2,7 +2,8 @@ bazel-*
 node_modules/
 .pnpm-*
 
-**/.aspect/generated/
+**/.aspect/generated/*
+!**/.aspect/generated/.gitignore
 
 .idea/
 .ijwb/
