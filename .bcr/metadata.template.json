@@ -3,8 +3,18 @@
   "maintainers": [
     {
       "name": "Jason Bedard",
-      "email": "jason@aspect.build",
+      "email": "jason@jbedard.ca",
       "github": "jbedard"
+    },
+    {
+      "name": "Greg Magolan",
+      "email": "greg@aspect.build",
+      "github": "gregmagolan"
+    },
+    {
+      "name": "Adam Cozzette",
+      "email": "adamc@aspect.build",
+      "github": "acozzette"
     }
   ],
   "repository": ["github:aspect-build/rules_esbuild"],
